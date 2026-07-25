@@ -1,0 +1,431 @@
+{
+  "info": {
+    "_postman_id": "2a3938e3-1c75-4ad7-8969-c6d3f77a5ced",
+    "name": "API Almuerzos",
+    "description": "Coleccion para probar autenticacion, menus y confirmaciones de almuerzo.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "serverUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "apiUrl",
+      "value": "{{serverUrl}}/api/v1"
+    },
+    {
+      "key": "adminEmail",
+      "value": "admin@colegio.edu"
+    },
+    {
+      "key": "adminPassword",
+      "value": "cambia_esta_contrasena"
+    },
+    {
+      "key": "studentEmail",
+      "value": "estudiante@colegio.edu"
+    },
+    {
+      "key": "studentPassword",
+      "value": "clave-segura"
+    },
+    {
+      "key": "studentToken",
+      "value": ""
+    },
+    {
+      "key": "adminToken",
+      "value": ""
+    },
+    {
+      "key": "menuId",
+      "value": ""
+    },
+    {
+      "key": "menuDate",
+      "value": "2026-07-30"
+    }
+  ],
+  "item": [
+    {
+      "name": "Sistema",
+      "item": [
+        {
+          "name": "Health check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{serverUrl}}/api/health"
+          }
+        },
+        {
+          "name": "Inicio de la API",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{serverUrl}}/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Autenticacion",
+      "item": [
+        {
+          "name": "Registrar estudiante",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Estudiante Postman\",\n  \"email\": \"{{studentEmail}}\",\n  \"password\": \"{{studentPassword}}\"\n}"
+            },
+            "url": "{{apiUrl}}/auth/register"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  pm.collectionVariables.set('studentToken', pm.response.json().token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login estudiante",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{studentEmail}}\",\n  \"password\": \"{{studentPassword}}\"\n}"
+            },
+            "url": "{{apiUrl}}/auth/login"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Login de estudiante exitoso', () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set('studentToken', pm.response.json().token);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login administrador",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
+            },
+            "url": "{{apiUrl}}/auth/login"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Login de administrador exitoso', () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set('adminToken', pm.response.json().token);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ver mi perfil (estudiante)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{studentToken}}"
+              }
+            ],
+            "url": "{{apiUrl}}/auth/me"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Menus - Administrador",
+      "item": [
+        {
+          "name": "Crear menu",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fecha\": \"{{menuDate}}\",\n  \"platoPrincipal\": \"Pollo a la plancha\",\n  \"acompanamiento\": \"Arroz y ensalada\",\n  \"bebida\": \"Jugo de mango\",\n  \"postre\": \"Gelatina\",\n  \"descripcion\": \"Menu de prueba creado desde Postman\",\n  \"estado\": \"Publicado\"\n}"
+            },
+            "url": "{{apiUrl}}/menus"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const date = new Date();",
+                  "date.setDate(date.getDate() + 1);",
+                  "pm.collectionVariables.set('menuDate', date.toISOString().slice(0, 10));"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Menu creado', () => pm.expect(pm.response.code).to.be.oneOf([201, 409]));",
+                  "if (pm.response.code === 201) {",
+                  "  pm.collectionVariables.set('menuId', pm.response.json().menu._id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar todos los menus",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{apiUrl}}/menus"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const menus = pm.response.json().menus || [];",
+                  "const currentMenu = menus.find((menu) => String(menu.fecha).slice(0, 10) === pm.collectionVariables.get('menuDate'));",
+                  "if (currentMenu) {",
+                  "  pm.collectionVariables.set('menuId', currentMenu._id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Editar menu",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"postre\": \"Fruta\",\n  \"descripcion\": \"Menu actualizado desde Postman\"\n}"
+            },
+            "url": "{{apiUrl}}/menus/{{menuId}}"
+          }
+        },
+        {
+          "name": "Cerrar menu",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"Cerrado\"\n}"
+            },
+            "url": "{{apiUrl}}/menus/{{menuId}}"
+          }
+        },
+        {
+          "name": "Eliminar menu (opcional)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{apiUrl}}/menus/{{menuId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Menus - Estudiante",
+      "item": [
+        {
+          "name": "Ver menus publicados",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{studentToken}}"
+              }
+            ],
+            "url": "{{apiUrl}}/menus"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const menus = pm.response.json().menus || [];",
+                  "if (menus.length && !pm.collectionVariables.get('menuId')) {",
+                  "  pm.collectionVariables.set('menuId', menus[0]._id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ver un menu",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{studentToken}}"
+              }
+            ],
+            "url": "{{apiUrl}}/menus/{{menuId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Confirmaciones",
+      "item": [
+        {
+          "name": "Confirmar que asistire (estudiante)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{studentToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"asistira\": true,\n  \"observacion\": \"Sin cebolla, por favor\"\n}"
+            },
+            "url": "{{apiUrl}}/attendance/menus/{{menuId}}"
+          }
+        },
+        {
+          "name": "Cambiar a no asistire (estudiante)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{studentToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"asistira\": false\n}"
+            },
+            "url": "{{apiUrl}}/attendance/menus/{{menuId}}"
+          }
+        },
+        {
+          "name": "Mis confirmaciones (estudiante)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{studentToken}}"
+              }
+            ],
+            "url": "{{apiUrl}}/attendance/me"
+          }
+        },
+        {
+          "name": "Ver confirmaciones de un menu (admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{apiUrl}}/attendance/menus/{{menuId}}"
+          }
+        }
+      ]
+    }
+  ]
+}
