@@ -17,6 +17,38 @@ export function getSession() {
 }
 export function saveSession(data) { localStorage.setItem("alimenta_token", data.token); localStorage.setItem("alimenta_user", JSON.stringify(data.user)); }
 export function logout() { localStorage.removeItem("alimenta_token"); localStorage.removeItem("alimenta_user"); window.location.href = "/"; }
+export function setupMobileSidebar() {
+  const sidebar = $("#sidebar");
+  const trigger = $("#mobile-menu");
+  const backdrop = $("#sidebar-backdrop");
+
+  if (!sidebar || !trigger || !backdrop) return () => {};
+
+  const close = () => {
+    sidebar.classList.remove("open");
+    backdrop.classList.remove("open");
+    document.body.classList.remove("menu-open");
+    trigger.setAttribute("aria-expanded", "false");
+  };
+
+  const toggle = () => {
+    const isOpen = sidebar.classList.toggle("open");
+    backdrop.classList.toggle("open", isOpen);
+    document.body.classList.toggle("menu-open", isOpen);
+    trigger.setAttribute("aria-expanded", String(isOpen));
+  };
+
+  trigger.addEventListener("click", toggle);
+  backdrop.addEventListener("click", close);
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") close();
+  });
+  window.addEventListener("resize", () => {
+    if (window.innerWidth >= 768) close();
+  });
+
+  return close;
+}
 export async function api(path, options = {}) {
   const { token } = getSession();
   const isFormData = options.body instanceof FormData;

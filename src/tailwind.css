@@ -43,4 +43,11 @@ h1, h2, h3, .display { font-family: Arial, Helvetica, sans-serif; }
 .toast.show { transform: translateY(0); opacity: 1; }
 .modal-backdrop { background: rgba(8,31,60,.52); backdrop-filter: blur(3px); }
 .status-dot { box-shadow: 0 0 0 4px rgba(34,197,94,.13); }
-@media (max-width: 767px) { .sidebar { position: fixed; left: 0; transform: translateX(-100%); transition: .25s; z-index: 50; } .sidebar.open { transform: translateX(0); } }
+.sidebar-backdrop { display: none; }
+@media (max-width: 767px) {
+  body.menu-open { overflow: hidden; }
+  .sidebar { position: fixed; left: 0; top: 0; bottom: 0; transform: translateX(-100%); transition: transform .25s; z-index: 60; box-shadow: 12px 0 30px rgba(8,31,60,.22); }
+  .sidebar.open { transform: translateX(0); }
+  .sidebar-backdrop { display: block; position: fixed; inset: 0; z-index: 50; border: 0; background: rgba(8,31,60,.48); opacity: 0; pointer-events: none; transition: opacity .25s; }
+  .sidebar-backdrop.open { opacity: 1; pointer-events: auto; }
+}

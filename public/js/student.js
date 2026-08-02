@@ -1,4 +1,4 @@
-import { $, api, clear, dateText, getSession, logout, make, notify, shortDate } from "./common.js";
+import { $, api, clear, dateText, getSession, logout, make, notify, setupMobileSidebar, shortDate } from "./common.js";
 
 const { user } = getSession();
 if (!user || user.role !== "Estudiante") window.location.href = "/";
@@ -9,12 +9,13 @@ $("#user-name").textContent = user.name;
 $("#user-initial").textContent = user.name[0];
 $("#today-date").textContent = dateText(new Date());
 $("#logout").addEventListener("click", logout);
-$("#mobile-menu").addEventListener("click", () => $("#sidebar").classList.toggle("open"));
+const closeMobileSidebar = setupMobileSidebar();
 document.querySelectorAll("[data-view]").forEach((button) => {
   button.addEventListener("click", () => switchView(button.dataset.view));
 });
 
 function switchView(view) {
+  closeMobileSidebar();
   document.querySelectorAll(".view").forEach((item) => item.classList.add("hidden"));
   $("#" + view + "-view").classList.remove("hidden");
   document.querySelectorAll("[data-view]").forEach((item) => item.classList.toggle("active", item.dataset.view === view));
