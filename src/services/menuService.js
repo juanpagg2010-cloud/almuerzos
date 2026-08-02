@@ -122,9 +122,9 @@ export const deleteMenu = async (id) => {
 };
 
 export const isMenuOpenForConfirmation = (menu) => {
-  const endOfMenuDay = new Date(menu.fecha);
-  endOfMenuDay.setUTCHours(23, 59, 59, 999);
-  return menu.estado === "Publicado" && Date.now() <= endOfMenuDay.getTime();
+  // La vista es semanal: cualquier menu publicado debe poder recibir la respuesta
+  // del estudiante hasta que administracion lo retire o lo cierre.
+  return menu.estado === "Publicado";
 };
 
 export default { addMenuImages, createMenu, deleteMenu, getMenuById, isMenuOpenForConfirmation, listMenus, updateMenu };
