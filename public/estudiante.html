@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Alimenta | Estudiante</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body class="bg-slate-50 text-slate-800">
+    <div id="toast" class="toast" role="status"></div>
+    <div class="min-h-screen md:flex">
+      <aside
+        id="sidebar"
+        class="sidebar w-72 min-h-screen text-white p-5 flex flex-col shrink-0"
+      >
+        <div class="flex items-center gap-3 px-3 py-4">
+          <span class="bg-white text-brand-700 p-2 rounded-xl">🍽</span
+          ><span class="display font-extrabold text-xl">alimenta</span>
+        </div>
+        <p
+          class="text-blue-200 text-xs uppercase tracking-[.15em] font-bold px-3 mt-8 mb-3"
+        >
+          Menú principal
+        </p>
+        <nav class="space-y-1">
+          <button
+            data-view="today"
+            class="nav-link active w-full px-3 py-3 rounded-xl text-left text-sm font-semibold"
+          >
+            ▦ Inicio
+          </button>
+          <button
+            data-view="history"
+            class="nav-link w-full px-3 py-3 rounded-xl text-left text-sm font-semibold"
+          >
+            ◫ Mis confirmaciones
+          </button>
+        </nav>
+        <div class="mt-auto glass rounded-2xl p-3 flex gap-3 items-center">
+          <div
+            id="user-initial"
+            class="w-9 h-9 bg-brand-100 text-brand-700 rounded-xl flex items-center justify-center font-bold"
+          ></div>
+          <div class="min-w-0">
+            <p id="user-name" class="text-sm font-bold truncate"></p>
+            <p class="text-xs text-blue-200">Estudiante</p>
+          </div>
+          <button id="logout" type="button" class="ml-auto">↗</button>
+        </div>
+      </aside>
+      <main class="flex-1 min-w-0">
+        <header
+          class="h-20 bg-white border-b border-slate-100 px-5 md:px-9 flex items-center justify-between"
+        >
+          <button
+            id="mobile-menu"
+            type="button"
+            class="md:hidden text-brand-700"
+          >
+            ☰
+          </button>
+          <div>
+            <p id="today-date" class="text-xs text-slate-400 font-semibold"></p>
+            <p class="font-bold text-slate-700">Portal de alimentación</p>
+          </div>
+          <span class="text-sm text-emerald-600">● Servicio activo</span>
+        </header>
+        <section class="p-5 md:p-9 max-w-6xl mx-auto">
+          <section id="today-view" class="view">
+            <div class="mb-8">
+              <p
+                id="greeting"
+                class="text-brand-600 text-sm font-bold uppercase tracking-wider"
+              ></p>
+              <h1 class="display text-3xl font-extrabold mt-1">
+                Menús de esta semana
+              </h1>
+              <p class="text-slate-500 mt-2">
+                Consulta los cinco almuerzos publicados y confirma tu
+                asistencia.
+              </p>
+            </div>
+            <div id="menus-list" class="grid lg:grid-cols-2 gap-5"></div>
+            <div
+              id="empty-menu"
+              class="hidden panel bg-white rounded-3xl p-10 text-center"
+            >
+              <div class="text-3xl">🍽</div>
+              <h2 class="display text-xl font-bold mt-5">
+                Aún no hay menús publicados
+              </h2>
+              <p class="text-slate-500 mt-2">
+                Tu institución publicará aquí las novedades.
+              </p>
+            </div>
+          </section>
+          <section id="history-view" class="view hidden">
+            <div class="mb-8">
+              <p
+                class="text-brand-600 text-sm font-bold uppercase tracking-wider"
+              >
+                Tu historial
+              </p>
+              <h1 class="display text-3xl font-extrabold mt-1">
+                Mis confirmaciones
+              </h1>
+            </div>
+            <div class="bg-white panel rounded-3xl overflow-hidden">
+              <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                  <thead class="bg-slate-50 text-slate-500">
+                    <tr>
+                      <th class="text-left p-5">Fecha</th>
+                      <th class="text-left p-5">Menú</th>
+                      <th class="text-left p-5">Respuesta</th>
+                    </tr>
+                  </thead>
+                  <tbody id="history-body"></tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
+    <script type="module" src="/js/student.js"></script>
+  </body>
+</html>

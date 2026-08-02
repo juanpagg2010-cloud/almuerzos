@@ -2,6 +2,7 @@ import { Router } from "express";
 import { protect } from "../middlewares/authMiddleware.js";
 import { authorizeRoles } from "../middlewares/roleMiddleware.js";
 import validateObjectId from "../middlewares/validateObjectId.js";
+import { uploadMenuImages } from "../middlewares/menuUploadMiddleware.js";
 import * as menuService from "../services/menuService.js";
 
 const router = Router();
@@ -33,6 +34,18 @@ router.post("/", authorizeRoles(ADMIN), async (req, res) => {
       message: error.message || "No se pudo crear el menu.",
     });
   }
+});
+
+router.post("/:id/images", authorizeRoles(ADMIN), validateObjectId("id"), (req, res) => {
+  uploadMenuImages(req, res, async (uploadError) => {
+    if (uploadError) return res.status(uploadError.statusCode || 400).json({ ok: false, message: uploadError.message || "No se pudieron cargar las imágenes." });
+    try {
+      const menu = await menuService.addMenuImages(req.params.id, req.files);
+      return res.status(200).json({ ok: true, menu });
+    } catch (error) {
+      return res.status(error.statusCode || 400).json({ ok: false, message: error.message || "No se pudieron guardar las imágenes." });
+    }
+  });
 });
 
 // Consulta un menu puntual segun los permisos del usuario.

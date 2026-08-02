@@ -4,8 +4,7 @@ const menuSchema = new Schema(
   {
     fecha: {
       type: Date,
-      required: [true, "La fecha del menu es obligatoria."],
-      unique: true,
+      default: Date.now,
       index: true,
     },
     platoPrincipal: {
@@ -23,10 +22,9 @@ const menuSchema = new Schema(
       trim: true,
       default: "",
     },
-    postre: {
-      type: String,
-      trim: true,
-      default: "",
+    imagenes: {
+      type: [String],
+      default: [],
     },
     descripcion: {
       type: String,
@@ -35,8 +33,13 @@ const menuSchema = new Schema(
     },
     estado: {
       type: String,
-      enum: ["Publicado", "Cerrado"],
-      default: "Publicado",
+      enum: ["Borrador", "Publicado", "Cerrado"],
+      default: "Borrador",
+    },
+    diaSemana: {
+      type: String,
+      enum: ["", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes"],
+      default: "",
     },
     creadoPor: {
       type: Schema.Types.ObjectId,
