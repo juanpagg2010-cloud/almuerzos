@@ -21,8 +21,7 @@
     "dev": "node --watch src/server.js",
     "build:css": "tailwindcss -c tailwind.config.cjs -i ./src/tailwind.css -o ./public/styles.css --minify",
     "watch:css": "tailwindcss -c tailwind.config.cjs -i ./src/tailwind.css -o ./public/styles.css --watch",
-    "seed": "node src/seed.js",
-    "test": "node --test"
+    "seed": "node src/seed.js"
   },
   "keywords": [],
   "author": "",

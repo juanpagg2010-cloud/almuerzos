@@ -38,7 +38,12 @@ const seedAdmin = async () => {
       role: "Admin",
       isActive: true,
     },
-    { new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true },
+    {
+      returnDocument: "after",
+      upsert: true,
+      runValidators: true,
+      setDefaultsOnInsert: true,
+    },
   );
 
   console.log(`Administrador listo: ${user.email}`);

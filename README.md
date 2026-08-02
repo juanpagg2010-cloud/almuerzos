@@ -25,6 +25,16 @@ npm run dev
 
 La API queda en `http://localhost:3000` y el health check es `GET /api/health`.
 
+## Probar localmente
+
+Con MongoDB configurado en `.env`, ejecuta:
+
+```bash
+npm run dev
+```
+
+Despues abre `http://localhost:3000/api/health` o importa la coleccion de Postman. Para detener el servidor usa `Ctrl + C` en la terminal.
+
 ## Estructura
 
 ```txt
@@ -108,11 +118,19 @@ Ejemplo de confirmación:
 
 Un estudiante solo puede tener una confirmación por menú; si vuelve a enviar la ruta, actualiza su respuesta.
 
-## Pruebas
+## Despliegue en Render
 
-```bash
-npm test
-```
+El archivo `render.yaml` ya configura el servicio web, la compilacion de Tailwind, `npm start` y el health check `/api/health`.
+
+1. Sube el proyecto a GitHub sin incluir `.env`.
+2. En Render selecciona **New > Blueprint** y conecta el repositorio.
+3. Render detectara `render.yaml`. Antes de crear el servicio, define `MONGO_URI` con tu cadena de MongoDB Atlas. `JWT_SECRET` se genera automaticamente.
+4. En MongoDB Atlas habilita la conexion desde Render en **Network Access**. Puedes usar temporalmente `0.0.0.0/0` para una API publica.
+5. Al completar el despliegue, abre `https://TU-SERVICIO.onrender.com/api/health`.
+
+El administrador debe existir previamente en la misma base de datos de Atlas. Crealo una vez con `npm run seed` usando ese mismo `MONGO_URI`.
+
+> Las imagenes cargadas se guardan actualmente en `public/uploads`. En el plan gratuito de Render ese almacenamiento es temporal y se borra cuando el servicio se reinicia o se vuelve a desplegar. Para conservar imagenes debes usar Cloudinary, S3 u otro almacenamiento externo, o un disco persistente de Render (plan pagado).
 
 ## Postman
 
