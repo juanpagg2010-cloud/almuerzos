@@ -1,0 +1,33 @@
+{
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "lucide": "^0.468.0",
+    "mongoose": "^9.8.0",
+    "multer": "^2.2.0"
+  },
+  "name": "almuerzos",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/server.js",
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "build:css": "tailwindcss -c tailwind.config.cjs -i ./src/tailwind.css -o ./public/styles.css --minify",
+    "watch:css": "tailwindcss -c tailwind.config.cjs -i ./src/tailwind.css -o ./public/styles.css --watch",
+    "seed": "node src/seed.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  }
+}
