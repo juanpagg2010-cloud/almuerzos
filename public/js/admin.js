@@ -23,6 +23,8 @@ $("#user-form").addEventListener("submit", saveUser);
 $("#edit-student-form").addEventListener("submit", saveStudent);
 $("#close-student-modal").addEventListener("click", closeStudentForm);
 $("#user-role").addEventListener("change", toggleStudentFields);
+$("#user-grade").addEventListener("input", syncNewUserGroupLimit);
+$("#edit-student-grade").addEventListener("change", () => syncStudentGroups());
 $("#previous").addEventListener("click", () => { page -= 1; loadUsers(); });
 $("#next").addEventListener("click", () => { page += 1; loadUsers(); });
 
@@ -77,13 +79,13 @@ async function loadMenus() {
         menu.imagenes.slice(0, 3).forEach((source) => { const image = document.createElement("img"); image.src = source; image.alt = `Imagen de ${menu.platoPrincipal}`; image.className = "w-16 h-16 rounded-xl object-cover"; pictures.append(image); });
         info.append(pictures);
       }
-      const actions = make("div");
+      const actions = make("div", undefined, "flex flex-wrap gap-2");
       const edit = make("button", "Editar", "rounded-xl px-3 py-2 bg-slate-100 text-slate-600");
       edit.addEventListener("click", () => openMenuForm(menu));
-      const remove = make("button", "Eliminar", "rounded-xl px-3 py-2 bg-rose-50 text-rose-600 ml-2");
+      const remove = make("button", "Eliminar", "rounded-xl px-3 py-2 bg-rose-50 text-rose-600");
       remove.addEventListener("click", () => deleteMenu(menu._id));
       if (menu.estado === "Publicado") {
-        const withdraw = make("button", "Retirar de semana", "rounded-xl px-3 py-2 bg-amber-50 text-amber-700 mr-2");
+        const withdraw = make("button", "Retirar de semana", "rounded-xl px-3 py-2 bg-amber-50 text-amber-700");
         withdraw.addEventListener("click", () => withdrawMenu(menu._id));
         actions.append(withdraw);
       }
@@ -147,10 +149,27 @@ function openStudentForm(student) {
   $("#edit-student-id").value = student._id;
   $("#edit-student-name").value = student.name;
   $("#edit-student-grade").value = student.grado;
+  syncStudentGroups(student.grupo);
   $("#student-modal").classList.remove("hidden"); $("#student-modal").classList.add("flex");
 }
 
 function closeStudentForm() { $("#student-modal").classList.add("hidden"); $("#student-modal").classList.remove("flex"); }
+
+function groupLimit(grade) { return Number(grade) >= 10 ? 5 : Number(grade) >= 6 ? 6 : 8; }
+
+function syncStudentGroups(selectedGroup = "") {
+  const input = $("#edit-student-group");
+  const limit = groupLimit($("#edit-student-grade").value);
+  input.replaceChildren();
+  for (let group = 1; group <= limit; group += 1) input.append(new Option(`${group}`, group, false, String(group) === String(selectedGroup)));
+}
+
+function syncNewUserGroupLimit() {
+  const groupInput = $("#user-group");
+  const limit = groupLimit($("#user-grade").value);
+  groupInput.max = limit;
+  if (Number(groupInput.value) > limit) groupInput.value = "";
+}
 
 async function saveStudent(event) {
   event.preventDefault();
@@ -165,6 +184,7 @@ function toggleStudentFields() {
   const isStudent = $("#user-role").value === "Estudiante";
   $("#student-fields").classList.toggle("hidden", !isStudent);
   $("#user-grade").required = isStudent; $("#user-group").required = isStudent;
+  syncNewUserGroupLimit();
   if (!isStudent) { $("#user-grade").value = ""; $("#user-group").value = ""; }
 }
 

@@ -22,6 +22,21 @@ const validateGrade = (grado) => {
   return normalizedGrade;
 };
 
+const groupLimitForGrade = (grado) => {
+  if (grado >= 10) return 5;
+  if (grado >= 6) return 6;
+  return 8;
+};
+
+const validateGroup = (grado, grupo) => {
+  const normalizedGroup = Number(grupo);
+  const limit = groupLimitForGrade(grado);
+  if (!Number.isInteger(normalizedGroup) || normalizedGroup < 1 || normalizedGroup > limit) {
+    throw appError(`Para ${grado}° el grupo debe estar entre 1 y ${limit}.`, 400);
+  }
+  return normalizedGroup;
+};
+
 export const sanitizeUser = (user) => {
   const data = user.toObject ? user.toObject() : { ...user };
   delete data.password;
@@ -45,14 +60,10 @@ export const registerStudent = async ({ name, email, grado, grupo, password }) =
   const normalizedEmail = normalizeEmail(email);
   const normalizedName = validateName(name);
   const normalizedGrade = validateGrade(grado);
-  const normalizedGroup = Number(grupo);
+  const normalizedGroup = validateGroup(normalizedGrade, grupo);
 
   if (!normalizedEmail || !grado || !grupo || !password) {
     throw appError("Nombre, correo y contrasena son obligatorios; tambien debes indicar grado y grupo. Ingresa tu nombre completo.", 400);
-  }
-
-  if (!Number.isInteger(normalizedGroup) || normalizedGroup < 1 || normalizedGroup > 8) {
-    throw appError("El grupo debe estar entre 1 y 8.", 400);
   }
 
   if (String(password).length < 6) {
@@ -116,8 +127,8 @@ export const createUserByAdmin = async ({ name, email, grado, grupo, password, r
   if (String(password).length < 6) throw appError("La contrasena debe tener al menos 6 caracteres.", 400);
 
   if (selectedRole === "Estudiante") {
-    validateGrade(normalizedGrade);
-    if (!Number.isInteger(normalizedGroup) || normalizedGroup < 1 || normalizedGroup > 8) throw appError("El grupo debe estar entre 1 y 8.", 400);
+    const validGrade = validateGrade(normalizedGrade);
+    validateGroup(validGrade, normalizedGroup);
   }
 
   const exists = await User.exists({ email: normalizedEmail });
@@ -146,21 +157,23 @@ export const updateOwnStudentProfile = async (userId, payload) => {
 };
 
 export const updateStudentByAdmin = async (studentId, payload) => {
-  const allowedFields = ["name", "grado"];
+  const allowedFields = ["name", "grado", "grupo"];
   const invalidFields = Object.keys(payload).filter((field) => !allowedFields.includes(field));
   if (invalidFields.length) throw appError("Solo se pueden modificar el nombre y el grado del estudiante.", 400);
   if (!Object.keys(payload).length) throw appError("Debes enviar datos para actualizar.", 400);
 
+  const student = await User.findOne({ _id: studentId, role: "Estudiante" });
+  if (!student) throw appError("Estudiante no encontrado.", 404);
+
   const updates = {};
   if (Object.hasOwn(payload, "name")) updates.name = validateName(payload.name);
   if (Object.hasOwn(payload, "grado")) updates.grado = validateGrade(payload.grado);
+  const resultingGrade = updates.grado ?? student.grado;
+  if (Object.hasOwn(payload, "grupo")) updates.grupo = validateGroup(resultingGrade, payload.grupo);
+  else validateGroup(resultingGrade, student.grupo);
 
-  const student = await User.findOneAndUpdate(
-    { _id: studentId, role: "Estudiante" },
-    updates,
-    { new: true, runValidators: true },
-  );
-  if (!student) throw appError("Estudiante no encontrado.", 404);
+  student.set(updates);
+  await student.save();
   return student;
 };
 

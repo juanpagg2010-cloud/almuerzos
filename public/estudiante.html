@@ -54,7 +54,7 @@
       <button id="sidebar-backdrop" class="sidebar-backdrop" type="button" aria-label="Cerrar menú"></button>
       <main class="flex-1 min-w-0">
         <header
-          class="h-20 bg-white border-b border-slate-100 px-5 md:px-9 flex items-center justify-between"
+          class="app-header h-20 bg-white border-b border-slate-100 px-5 md:px-9 flex items-center justify-between"
         >
           <button
             id="mobile-menu"
@@ -69,7 +69,7 @@
             <p id="today-date" class="text-xs text-slate-400 font-semibold"></p>
             <p class="font-bold text-slate-700">Portal de alimentación</p>
           </div>
-          <span class="text-sm text-emerald-600">● Servicio activo</span>
+          <span class="hidden sm:inline text-sm text-emerald-600">● Servicio activo</span>
         </header>
         <section class="p-5 md:p-9 max-w-6xl mx-auto">
           <section id="today-view" class="view">
@@ -112,8 +112,8 @@
               </h1>
             </div>
             <div class="bg-white panel rounded-3xl overflow-hidden">
-              <div class="overflow-x-auto">
-                <table class="min-w-full text-sm">
+              <div class="table-scroll overflow-x-auto">
+                <table class="responsive-table min-w-[460px] w-full text-sm">
                   <thead class="bg-slate-50 text-slate-500">
                     <tr>
                       <th class="text-left p-5">Fecha</th>

@@ -3,9 +3,15 @@
 @tailwind utilities;
 
 :root { font-family: Arial, Helvetica, sans-serif; }
-body { min-height: 100vh; }
+*, *::before, *::after { box-sizing: border-box; }
+html { overflow-x: hidden; }
+body { min-height: 100vh; min-height: 100dvh; max-width: 100%; overflow-x: hidden; }
+img, svg, video, canvas { display: block; max-width: 100%; }
+button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+button, [role="button"] { min-height: 44px; touch-action: manipulation; }
+input, select, textarea { font-size: 16px; }
 h1, h2, h3, .display { font-family: Arial, Helvetica, sans-serif; }
-.auth-bg { background: radial-gradient(circle at 12% 15%, #4aa5f7 0, transparent 25%), radial-gradient(circle at 88% 86%, #133e76 0, transparent 27%), linear-gradient(135deg, #08264b, #0e5a9f); }
+.auth-bg { min-height: 100dvh; background: radial-gradient(circle at 12% 15%, #4aa5f7 0, transparent 25%), radial-gradient(circle at 88% 86%, #133e76 0, transparent 27%), linear-gradient(135deg, #08264b, #0e5a9f); }
 .glass { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.18); backdrop-filter: blur(12px); }
 .dot-grid { background-image: radial-gradient(rgba(255,255,255,.22) 1px, transparent 1px); background-size: 18px 18px; }
 .sidebar { background: linear-gradient(170deg, #082b58, #0b4f93 58%, #0f69b8); }
@@ -44,10 +50,33 @@ h1, h2, h3, .display { font-family: Arial, Helvetica, sans-serif; }
 .modal-backdrop { background: rgba(8,31,60,.52); backdrop-filter: blur(3px); }
 .status-dot { box-shadow: 0 0 0 4px rgba(34,197,94,.13); }
 .sidebar-backdrop { display: none; }
+.table-scroll { overscroll-behavior-inline: contain; -webkit-overflow-scrolling: touch; }
+.responsive-table th, .responsive-table td { vertical-align: middle; }
+@media (max-width: 639px) {
+  .auth-bg { padding: .75rem; }
+  .auth-bg > main { min-height: calc(100dvh - 1.5rem); border-radius: 1.5rem; padding: 1.5rem; }
+  .auth-bg .lg\:hidden { margin-bottom: 3rem; }
+  .app-header { height: auto; min-height: 4.5rem; padding-top: .75rem; padding-bottom: .75rem; gap: .75rem; }
+  .app-header > div { min-width: 0; }
+  .app-header #today-date { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 12rem; }
+  .table-scroll { margin-inline: -.25rem; padding-bottom: .25rem; }
+  .responsive-table th, .responsive-table td { padding: .75rem !important; }
+  .modal-backdrop { align-items: flex-start; overflow-y: auto; padding: .75rem; }
+  .modal-backdrop > form { width: 100%; max-height: calc(100dvh - 1.5rem); overflow-y: auto; border-radius: 1.5rem; padding: 1.25rem; margin-block: auto; }
+  .modal-backdrop > form > div:first-child { position: sticky; top: -1.25rem; z-index: 1; background: white; padding-top: 1.25rem; padding-bottom: .75rem; }
+  .toast { left: .75rem; right: .75rem; top: .75rem; max-width: none; }
+  .menu-hero, .menu-hero-image { min-height: 18rem; }
+  .menu-hero-overlay { padding: 1.25rem; }
+  .menu-card > div { padding: 1.25rem; }
+  #recent-list > div { align-items: flex-start; flex-wrap: wrap; gap: .35rem; }
+}
 @media (max-width: 767px) {
   body.menu-open { overflow: hidden; }
-  .sidebar { position: fixed; left: 0; top: 0; bottom: 0; transform: translateX(-100%); transition: transform .25s; z-index: 60; box-shadow: 12px 0 30px rgba(8,31,60,.22); }
+  .sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: min(18rem, calc(100vw - 3.5rem)); min-height: 100dvh; transform: translateX(-100%); transition: transform .25s; z-index: 60; box-shadow: 12px 0 30px rgba(8,31,60,.22); overflow-y: auto; }
   .sidebar.open { transform: translateX(0); }
   .sidebar-backdrop { display: block; position: fixed; inset: 0; z-index: 50; border: 0; background: rgba(8,31,60,.48); opacity: 0; pointer-events: none; transition: opacity .25s; }
   .sidebar-backdrop.open { opacity: 1; pointer-events: auto; }
+}
+@media (min-width: 768px) and (max-width: 1023px) {
+  .sidebar { width: 15rem; }
 }
