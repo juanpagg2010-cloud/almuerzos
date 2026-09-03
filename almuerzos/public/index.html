@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Alimenta | Ingresar</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body
+    class="auth-bg min-h-screen grid lg:grid-cols-[1.05fr_.95fr] p-4 md:p-7"
+  >
+    <section
+      class="hidden lg:flex dot-grid rounded-[2rem] text-white p-12 flex-col justify-between"
+    >
+      <div class="flex items-center gap-3 font-bold text-xl">🍽 alimenta</div>
+      <div class="max-w-xl">
+        <span class="glass px-4 py-2 rounded-full text-sm"
+          >Bienestar institucional</span
+        >
+        <h1 class="display text-5xl leading-tight font-extrabold mt-7">
+          El almuerzo que une a toda la comunidad.
+        </h1>
+        <p class="text-blue-100 text-lg mt-5">
+          Consulta el menú y organiza cada servicio con unos pocos clics.
+        </p>
+      </div>
+      <p class="text-blue-200 text-sm">Portal institucional de alimentación</p>
+    </section>
+    <main
+      class="bg-white rounded-[2rem] flex items-center justify-center p-6 md:p-12"
+    >
+      <section class="w-full max-w-md">
+        <div class="lg:hidden text-brand-700 font-bold text-xl mb-12">
+          🍽 alimenta
+        </div>
+        <p class="text-brand-600 font-semibold text-sm mb-2">
+          BIENVENIDO DE NUEVO
+        </p>
+        <h1 class="display text-3xl font-bold text-slate-900">
+          Ingresa a tu portal
+        </h1>
+        <p class="text-slate-500 mt-3">
+          Consulta el menú y confirma tu asistencia.
+        </p>
+        <form id="login-form" class="mt-8 space-y-5">
+          <label class="block text-sm font-semibold"
+            >Correo institucional<input
+              name="email"
+              type="email"
+              required
+              placeholder="nombre@institucion.edu"
+              class="mt-2 w-full border border-slate-200 rounded-xl px-4 py-3.5" /></label
+          ><label class="block text-sm font-semibold"
+            >Contraseña<input
+              name="password"
+              type="password"
+              required
+              minlength="6"
+              placeholder="••••••••"
+              class="mt-2 w-full border border-slate-200 rounded-xl px-4 py-3.5" /></label
+          ><button
+            class="w-full rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold py-3.5"
+          >
+            Entrar →
+          </button>
+        </form>
+        <p class="text-center text-sm text-slate-500 mt-7">
+          ¿Aún no tienes cuenta?
+          <a href="/registro.html" class="text-brand-600 font-bold"
+            >Regístrate aquí</a
+          >
+        </p>
+      </section>
+    </main>
+    <div id="toast" class="toast" role="status"></div>
+    <script type="module" src="/js/auth.js"></script>
+  </body>
+</html>
