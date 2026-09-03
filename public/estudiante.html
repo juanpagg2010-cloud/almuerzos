@@ -35,6 +35,9 @@
           >
             ◫ Mis confirmaciones
           </button>
+          <button data-view="profile" class="nav-link w-full px-3 py-3 rounded-xl text-left text-sm font-semibold">
+            ◌ Mi perfil
+          </button>
         </nav>
         <div class="mt-auto glass rounded-2xl p-3 flex gap-3 items-center">
           <div
@@ -122,6 +125,14 @@
                 </table>
               </div>
             </div>
+          </section>
+          <section id="profile-view" class="view hidden max-w-xl">
+            <div class="mb-8"><p class="text-brand-600 text-sm font-bold uppercase tracking-wider">Mi cuenta</p><h1 class="display text-3xl font-extrabold mt-1">Perfil</h1><p class="text-slate-500 mt-2">Actualiza tu nombre. El grado y grupo son datos institucionales.</p></div>
+            <form id="profile-form" class="bg-white panel rounded-3xl p-6 space-y-5">
+              <label class="block text-sm font-semibold">Nombre completo<input id="profile-name" name="name" required minlength="2" maxlength="120" class="mt-2 w-full border rounded-xl px-4 py-3" /></label>
+              <div class="grid sm:grid-cols-2 gap-4"><label class="block text-sm font-semibold">Grado<input id="profile-grade" readonly class="mt-2 w-full border rounded-xl px-4 py-3 bg-slate-100 text-slate-500 cursor-not-allowed" /></label><label class="block text-sm font-semibold">Grupo<input id="profile-group" readonly class="mt-2 w-full border rounded-xl px-4 py-3 bg-slate-100 text-slate-500 cursor-not-allowed" /></label></div>
+              <button class="w-full sm:w-auto bg-brand-600 text-white rounded-xl px-5 py-3 font-bold">Guardar cambios</button>
+            </form>
           </section>
         </section>
       </main>

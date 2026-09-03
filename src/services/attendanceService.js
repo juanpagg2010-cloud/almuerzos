@@ -41,7 +41,7 @@ export const getMenuConfirmations = async (menuId) => {
   if (!menu) throw appError("Menu no encontrado.", 404);
 
   const confirmations = await AttendanceConfirmation.find({ menuId })
-    .populate("estudianteId", "name email")
+    .populate("estudianteId", "name grado grupo")
     .sort({ updatedAt: -1 });
 
   const confirmed = confirmations.filter((confirmation) => confirmation.asistira).length;

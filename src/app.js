@@ -4,6 +4,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { errorHandler, notFound } from "./middlewares/errorMiddleware.js";
 import routes from "./routes/index.js";
+import { getServerTime } from "./utils/time.js";
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -25,6 +26,11 @@ app.get("/registro", (req, res) => res.sendFile(path.join(publicPath, "registro.
 
 app.get("/api/health", (req, res) => {
   res.json({ ok: true, status: "healthy" });
+});
+
+// Public server clock used by the UI. Database timestamps are always UTC.
+app.get("/api/time", (req, res) => {
+  res.json({ ok: true, serverTime: getServerTime() });
 });
 
 app.use("/api/v1", routes);

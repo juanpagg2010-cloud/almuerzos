@@ -16,3 +16,5 @@ services:
         generateValue: true
       - key: JWT_EXPIRES_IN
         value: 1d
+      - key: APP_TIME_ZONE
+        value: America/Bogota

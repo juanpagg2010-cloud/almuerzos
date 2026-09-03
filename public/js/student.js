@@ -1,15 +1,16 @@
-import { $, api, clear, dateText, getSession, logout, make, notify, setupMobileSidebar, shortDate } from "./common.js";
+import { $, api, clear, dateText, getServerNow, getSession, logout, make, notify, saveSession, setupMobileSidebar, shortDate } from "./common.js";
 
-const { user } = getSession();
+let { user } = getSession();
 if (!user || user.role !== "Estudiante") window.location.href = "/";
 
 const WEEKDAYS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
 
 $("#user-name").textContent = user.name;
 $("#user-initial").textContent = user.name[0];
-$("#today-date").textContent = dateText(new Date());
+getServerNow().then((now) => { $("#today-date").textContent = dateText(now); }).catch(() => { $("#today-date").textContent = dateText(new Date()); });
 $("#logout").addEventListener("click", logout);
 const closeMobileSidebar = setupMobileSidebar();
+$("#profile-form").addEventListener("submit", saveProfile);
 document.querySelectorAll("[data-view]").forEach((button) => {
   button.addEventListener("click", () => switchView(button.dataset.view));
 });
@@ -20,6 +21,7 @@ function switchView(view) {
   $("#" + view + "-view").classList.remove("hidden");
   document.querySelectorAll("[data-view]").forEach((item) => item.classList.toggle("active", item.dataset.view === view));
   if (view === "history") loadHistory();
+  else if (view === "profile") loadProfile();
   else loadMenus();
 }
 
@@ -107,6 +109,30 @@ async function loadHistory() {
   } catch (error) {
     notify(error.message, true);
   }
+}
+
+async function loadProfile() {
+  try {
+    const { user: currentUser } = await api("/auth/me");
+    $("#profile-name").value = currentUser.name;
+    $("#profile-grade").value = `${currentUser.grado}°`;
+    $("#profile-group").value = currentUser.grupo;
+  } catch (error) { notify(error.message, true); }
+}
+
+async function saveProfile(event) {
+  event.preventDefault();
+  try {
+    const { user: updatedUser, message } = await api("/auth/me", {
+      method: "PATCH",
+      body: JSON.stringify({ name: $("#profile-name").value }),
+    });
+    saveSession({ token: getSession().token, user: updatedUser });
+    user = updatedUser;
+    $("#user-name").textContent = updatedUser.name;
+    $("#user-initial").textContent = updatedUser.name[0];
+    notify(message || "Perfil actualizado correctamente.");
+  } catch (error) { notify(error.message, true); }
 }
 
 loadMenus();
