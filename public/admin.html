@@ -383,6 +383,14 @@
         <button class="mt-6 w-full bg-brand-600 text-white rounded-xl py-3 font-bold">Guardar cambios</button>
       </form>
     </div>
+    <div id="admin-modal" class="hidden modal-backdrop fixed inset-0 z-50 items-center justify-center p-4">
+      <form id="edit-admin-form" class="bg-white rounded-3xl w-full max-w-lg p-6">
+        <div class="flex justify-between gap-4"><div><h2 class="display text-2xl font-bold">Editar administrador</h2><p class="text-sm text-slate-500 mt-1">Actualiza los datos de otro administrador.</p></div><button id="close-admin-modal" type="button" aria-label="Cerrar">×</button></div>
+        <input id="edit-admin-id" type="hidden" />
+        <div class="grid gap-4 mt-6"><label>Nombre completo<input id="edit-admin-name" name="name" required minlength="2" maxlength="120" class="mt-2 w-full border rounded-xl px-3 py-3" /></label><label>Correo<input id="edit-admin-email" name="email" type="email" required class="mt-2 w-full border rounded-xl px-3 py-3" /></label><label>Nueva contraseña <span class="text-slate-400">(opcional)</span><input id="edit-admin-password" name="password" type="password" minlength="6" placeholder="Déjala vacía para conservarla" class="mt-2 w-full border rounded-xl px-3 py-3" /></label></div>
+        <button class="mt-6 w-full bg-brand-600 text-white rounded-xl py-3 font-bold">Guardar cambios</button>
+      </form>
+    </div>
     <script type="module" src="/js/admin.js"></script>
   </body>
 </html>

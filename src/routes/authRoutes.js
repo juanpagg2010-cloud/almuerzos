@@ -3,12 +3,14 @@ import { protect } from "../middlewares/authMiddleware.js";
 import {
   createToken,
   createUserByAdmin,
+  deleteOtherAdmin,
   getCurrentUser,
   loginUser,
   listStudents,
   listUsers,
   registerStudent,
   sanitizeUser,
+  updateOtherAdmin,
   updateOwnStudentProfile,
   updateStudentByAdmin,
 } from "../services/authService.js";
@@ -116,5 +118,25 @@ router.patch("/students/:id", protect, authorizeRoles("Admin"), validateObjectId
 router.delete("/students/:id", protect, authorizeRoles("Admin"), validateObjectId("id"), (req, res) => (
   res.status(405).json({ ok: false, message: "Los estudiantes no se pueden eliminar." })
 ));
+
+// An administrator can manage another administrator, but never their own
+// account through this screen. Student accounts use their separate route.
+router.patch("/admins/:id", protect, authorizeRoles("Admin"), validateObjectId("id"), async (req, res) => {
+  try {
+    const user = await updateOtherAdmin(req.params.id, getUserId(req.user), req.body);
+    return res.status(200).json({ ok: true, message: "Administrador actualizado correctamente.", user: sanitizeUser(user) });
+  } catch (error) {
+    return res.status(error.statusCode || 400).json({ ok: false, message: error.message || "No se pudo actualizar el administrador." });
+  }
+});
+
+router.delete("/admins/:id", protect, authorizeRoles("Admin"), validateObjectId("id"), async (req, res) => {
+  try {
+    await deleteOtherAdmin(req.params.id, getUserId(req.user));
+    return res.status(200).json({ ok: true, message: "Administrador eliminado correctamente." });
+  } catch (error) {
+    return res.status(error.statusCode || 400).json({ ok: false, message: error.message || "No se pudo eliminar el administrador." });
+  }
+});
 
 export default router;

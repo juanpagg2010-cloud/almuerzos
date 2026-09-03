@@ -159,7 +159,7 @@ export const updateOwnStudentProfile = async (userId, payload) => {
 export const updateStudentByAdmin = async (studentId, payload) => {
   const allowedFields = ["name", "grado", "grupo"];
   const invalidFields = Object.keys(payload).filter((field) => !allowedFields.includes(field));
-  if (invalidFields.length) throw appError("Solo se pueden modificar el nombre y el grado del estudiante.", 400);
+  if (invalidFields.length) throw appError("Solo se pueden modificar el nombre, grado y grupo del estudiante.", 400);
   if (!Object.keys(payload).length) throw appError("Debes enviar datos para actualizar.", 400);
 
   const student = await User.findOne({ _id: studentId, role: "Estudiante" });
@@ -175,6 +175,46 @@ export const updateStudentByAdmin = async (studentId, payload) => {
   student.set(updates);
   await student.save();
   return student;
+};
+
+const getOtherAdmin = async (adminId, actorId) => {
+  if (String(adminId) === String(actorId)) {
+    throw appError("No puedes modificar ni eliminar tu propia cuenta desde esta sección.", 403);
+  }
+  const admin = await User.findOne({ _id: adminId, role: "Admin" }).select("+password");
+  if (!admin) throw appError("Administrador no encontrado.", 404);
+  return admin;
+};
+
+export const updateOtherAdmin = async (adminId, actorId, payload) => {
+  const allowedFields = ["name", "email", "password"];
+  const invalidFields = Object.keys(payload).filter((field) => !allowedFields.includes(field));
+  if (invalidFields.length || !Object.keys(payload).length) {
+    throw appError("Solo se pueden modificar el nombre, correo o contraseña del administrador.", 400);
+  }
+
+  const admin = await getOtherAdmin(adminId, actorId);
+  if (Object.hasOwn(payload, "name")) admin.name = validateName(payload.name);
+  if (Object.hasOwn(payload, "email")) {
+    const email = normalizeEmail(payload.email);
+    if (!email) throw appError("El correo es obligatorio.", 400);
+    const alreadyExists = await User.exists({ email, _id: { $ne: admin._id } });
+    if (alreadyExists) throw appError("Ya existe una cuenta con este correo.", 409);
+    admin.email = email;
+  }
+  if (Object.hasOwn(payload, "password")) {
+    if (String(payload.password).length < 6) throw appError("La contraseña debe tener al menos 6 caracteres.", 400);
+    admin.password = await bcrypt.hash(payload.password, 12);
+  }
+
+  await admin.save();
+  return admin;
+};
+
+export const deleteOtherAdmin = async (adminId, actorId) => {
+  const admin = await getOtherAdmin(adminId, actorId);
+  await admin.deleteOne();
+  return admin;
 };
 
 export const listStudents = async ({ page = 1, limit = 10, search = "" } = {}) => {
@@ -214,4 +254,4 @@ export const listUsers = async ({ page = 1, limit = 10, search = "" } = {}) => {
   return { users, total, page: safePage, limit: safeLimit, pages: Math.max(1, Math.ceil(total / safeLimit)) };
 };
 
-export default { createToken, createUserByAdmin, getCurrentUser, listStudents, listUsers, loginUser, registerStudent, sanitizeUser, updateOwnStudentProfile, updateStudentByAdmin };
+export default { createToken, createUserByAdmin, deleteOtherAdmin, getCurrentUser, listStudents, listUsers, loginUser, registerStudent, sanitizeUser, updateOtherAdmin, updateOwnStudentProfile, updateStudentByAdmin };

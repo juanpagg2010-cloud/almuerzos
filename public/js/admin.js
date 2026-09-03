@@ -22,6 +22,8 @@ $("#close-user-modal").addEventListener("click", closeUserForm);
 $("#user-form").addEventListener("submit", saveUser);
 $("#edit-student-form").addEventListener("submit", saveStudent);
 $("#close-student-modal").addEventListener("click", closeStudentForm);
+$("#edit-admin-form").addEventListener("submit", saveAdmin);
+$("#close-admin-modal").addEventListener("click", closeAdminForm);
 $("#user-role").addEventListener("change", toggleStudentFields);
 $("#user-grade").addEventListener("input", syncNewUserGroupLimit);
 $("#edit-student-grade").addEventListener("change", () => syncStudentGroups());
@@ -155,6 +157,16 @@ function openStudentForm(student) {
 
 function closeStudentForm() { $("#student-modal").classList.add("hidden"); $("#student-modal").classList.remove("flex"); }
 
+function openAdminForm(admin) {
+  $("#edit-admin-id").value = admin._id;
+  $("#edit-admin-name").value = admin.name;
+  $("#edit-admin-email").value = admin.email;
+  $("#edit-admin-password").value = "";
+  $("#admin-modal").classList.remove("hidden"); $("#admin-modal").classList.add("flex");
+}
+
+function closeAdminForm() { $("#admin-modal").classList.add("hidden"); $("#admin-modal").classList.remove("flex"); }
+
 function groupLimit(grade) { return Number(grade) >= 10 ? 5 : Number(grade) >= 6 ? 6 : 8; }
 
 function syncStudentGroups(selectedGroup = "") {
@@ -177,6 +189,25 @@ async function saveStudent(event) {
   try {
     await api(`/auth/students/${id}`, { method: "PATCH", body: JSON.stringify(Object.fromEntries(new FormData(event.currentTarget))) });
     notify("Estudiante actualizado correctamente."); closeStudentForm(); loadUsers();
+  } catch (error) { notify(error.message, true); }
+}
+
+async function saveAdmin(event) {
+  event.preventDefault();
+  const id = $("#edit-admin-id").value;
+  const payload = Object.fromEntries(new FormData(event.currentTarget));
+  if (!payload.password) delete payload.password;
+  try {
+    await api(`/auth/admins/${id}`, { method: "PATCH", body: JSON.stringify(payload) });
+    notify("Administrador actualizado correctamente."); closeAdminForm(); loadUsers();
+  } catch (error) { notify(error.message, true); }
+}
+
+async function removeAdmin(admin) {
+  if (!confirm(`¿Eliminar al administrador ${admin.name}? Esta acción no se puede deshacer.`)) return;
+  try {
+    await api(`/auth/admins/${admin._id}`, { method: "DELETE" });
+    notify("Administrador eliminado correctamente."); loadUsers();
   } catch (error) { notify(error.message, true); }
 }
 
@@ -211,7 +242,14 @@ async function loadUsers() {
         const edit = make("button", "Editar", "rounded-lg bg-slate-100 px-3 py-2 text-sm font-bold text-brand-700");
         edit.addEventListener("click", () => openStudentForm(account));
         actions.append(edit);
-      } else actions.textContent = "—";
+      } else if (String(account._id) !== String(user._id || user.id)) {
+        actions.className = "p-5 flex flex-wrap gap-2";
+        const edit = make("button", "Editar", "rounded-lg bg-slate-100 px-3 py-2 text-sm font-bold text-brand-700");
+        const remove = make("button", "Eliminar", "rounded-lg bg-rose-50 px-3 py-2 text-sm font-bold text-rose-700");
+        edit.addEventListener("click", () => openAdminForm(account));
+        remove.addEventListener("click", () => removeAdmin(account));
+        actions.append(edit, remove);
+      } else actions.textContent = "Tu cuenta";
       row.append(actions);
       body.append(row);
     });
