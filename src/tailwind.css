@@ -15,6 +15,7 @@ h1, h2, h3, .display { font-family: Arial, Helvetica, sans-serif; }
 .glass { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.18); backdrop-filter: blur(12px); }
 .dot-grid { background-image: radial-gradient(rgba(255,255,255,.22) 1px, transparent 1px); background-size: 18px 18px; }
 .sidebar { background: linear-gradient(170deg, #082b58, #0b4f93 58%, #0f69b8); }
+.institution-shield { width: 2.75rem; height: 2.75rem; flex: 0 0 auto; padding: .15rem; object-fit: contain; background: #fff; border-radius: .75rem; box-shadow: 0 4px 12px rgba(2, 25, 51, .22); }
 .nav-link { color: #c9e4ff; transition: .2s; }
 .nav-link:hover, .nav-link.active { color: #fff; background: rgba(255,255,255,.15); }
 .panel { box-shadow: 0 10px 35px rgba(15,60,105,.07); }

@@ -99,7 +99,7 @@ async function loadOverview() {
       const row = make("div", undefined, "py-3 flex justify-between");
       const student = item.estudianteId;
       const identity = student
-        ? `${student.name} — ${student.grado}°`
+        ? `${student.name} — ${student.grado}° · Grupo ${student.grupo}`
         : "Estudiante no disponible";
       row.append(
         make("span", identity, "font-semibold text-sm"),
