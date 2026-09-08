@@ -1,6 +1,7 @@
 import Menu from "../models/menuModel.js";
 import AttendanceConfirmation from "../models/attendanceConfirmationModel.js";
 import appError from "../utils/appError.js";
+import { deleteStoredMenuImages, storeMenuImages } from "./mediaService.js";
 
 const WEEKDAYS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
 
@@ -108,8 +109,18 @@ export const updateMenu = async (id, payload) => {
 
 export const addMenuImages = async (id, files) => {
   if (!files?.length) throw appError("Selecciona al menos una imagen.", 400);
-  const imagePaths = files.map((file) => `/uploads/menus/${file.filename}`);
-  const menu = await Menu.findByIdAndUpdate(id, { $push: { imagenes: { $each: imagePaths } } }, { new: true });
+  const existingMenu = await Menu.findById(id);
+  if (!existingMenu) throw appError("Menú no encontrado.", 404);
+
+  const imageUrls = await storeMenuImages(existingMenu._id, files);
+  let menu;
+  try {
+    // New images are placed first so replacing a menu photo is immediately visible.
+    menu = await Menu.findByIdAndUpdate(id, { $push: { imagenes: { $each: imageUrls, $position: 0 } } }, { new: true });
+  } catch (error) {
+    await deleteStoredMenuImages(imageUrls);
+    throw error;
+  }
   if (!menu) throw appError("Menú no encontrado.", 404);
   return menu;
 };
@@ -118,6 +129,7 @@ export const deleteMenu = async (id) => {
   const menu = await Menu.findByIdAndDelete(id);
   if (!menu) throw appError("Menú no encontrado.", 404);
   await AttendanceConfirmation.deleteMany({ menuId: menu._id });
+  await deleteStoredMenuImages(menu.imagenes);
   return menu;
 };
 

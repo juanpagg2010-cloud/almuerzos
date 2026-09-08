@@ -38,7 +38,14 @@ router.post("/", authorizeRoles(ADMIN), async (req, res) => {
 
 router.post("/:id/images", authorizeRoles(ADMIN), validateObjectId("id"), (req, res) => {
   uploadMenuImages(req, res, async (uploadError) => {
-    if (uploadError) return res.status(uploadError.statusCode || 400).json({ ok: false, message: uploadError.message || "No se pudieron cargar las imágenes." });
+    if (uploadError) {
+      const message = uploadError.code === "LIMIT_FILE_SIZE"
+        ? "Cada imagen puede pesar máximo 5 MB."
+        : uploadError.code === "LIMIT_FILE_COUNT"
+          ? "Puedes cargar máximo 5 imágenes a la vez."
+          : uploadError.message || "No se pudieron cargar las imágenes.";
+      return res.status(uploadError.statusCode || 400).json({ ok: false, message });
+    }
     try {
       const menu = await menuService.addMenuImages(req.params.id, req.files);
       return res.status(200).json({ ok: true, menu });

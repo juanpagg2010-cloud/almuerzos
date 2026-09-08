@@ -1,27 +1,14 @@
-import fs from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 import multer from "multer";
 import appError from "../utils/appError.js";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const uploadDirectory = path.join(__dirname, "../../public/uploads/menus");
-fs.mkdirSync(uploadDirectory, { recursive: true });
-
-const storage = multer.diskStorage({
-  destination: uploadDirectory,
-  filename: (_req, file, callback) => {
-    const extension = path.extname(file.originalname).toLowerCase();
-    callback(null, `${Date.now()}-${crypto.randomUUID()}${extension}`);
-  },
-});
-
 const upload = multer({
-  storage,
+  // The buffer is immediately persisted in GridFS by the menu service. Writing
+  // to Render's local filesystem would lose images after a deploy or restart.
+  storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024, files: 5 },
   fileFilter: (_req, file, callback) => {
-    if (file.mimetype.startsWith("image/")) return callback(null, true);
-    return callback(appError("Solo se permiten archivos de imagen.", 400));
+    if (["image/jpeg", "image/png", "image/webp"].includes(file.mimetype)) return callback(null, true);
+    return callback(appError("Solo se permiten imágenes JPEG, PNG o WEBP.", 400));
   },
 });
 
