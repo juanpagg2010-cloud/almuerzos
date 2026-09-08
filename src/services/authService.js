@@ -3,8 +3,14 @@ import jwt from "jsonwebtoken";
 import User from "../models/userModel.js";
 import appError from "../utils/appError.js";
 
-const normalizeEmail = (email) => String(email || "").trim().toLowerCase();
-const normalizeName = (name) => String(name || "").trim().replace(/\s+/g, " ");
+const normalizeEmail = (email) =>
+  String(email || "")
+    .trim()
+    .toLowerCase();
+const normalizeName = (name) =>
+  String(name || "")
+    .trim()
+    .replace(/\s+/g, " ");
 
 const validateName = (name) => {
   const normalizedName = normalizeName(name);
@@ -16,7 +22,11 @@ const validateName = (name) => {
 
 const validateGrade = (grado) => {
   const normalizedGrade = Number(grado);
-  if (!Number.isInteger(normalizedGrade) || normalizedGrade < 1 || normalizedGrade > 11) {
+  if (
+    !Number.isInteger(normalizedGrade) ||
+    normalizedGrade < 1 ||
+    normalizedGrade > 11
+  ) {
     throw appError("El grado debe estar entre 1 y 11.", 400);
   }
   return normalizedGrade;
@@ -31,8 +41,15 @@ const groupLimitForGrade = (grado) => {
 const validateGroup = (grado, grupo) => {
   const normalizedGroup = Number(grupo);
   const limit = groupLimitForGrade(grado);
-  if (!Number.isInteger(normalizedGroup) || normalizedGroup < 1 || normalizedGroup > limit) {
-    throw appError(`Para ${grado}° el grupo debe estar entre 1 y ${limit}.`, 400);
+  if (
+    !Number.isInteger(normalizedGroup) ||
+    normalizedGroup < 1 ||
+    normalizedGroup > limit
+  ) {
+    throw appError(
+      `Para ${grado}° el grupo debe estar entre 1 y ${limit}.`,
+      400,
+    );
   }
   return normalizedGroup;
 };
@@ -48,22 +65,29 @@ export const createToken = (user) => {
     throw appError("JWT_SECRET no esta configurado.", 500);
   }
 
-  return jwt.sign(
-    { id: user._id, role: user.role },
-    process.env.JWT_SECRET,
-    { expiresIn: process.env.JWT_EXPIRES_IN || "1d" },
-  );
+  return jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN || "1d",
+  });
 };
 
 // El registro abierto crea solamente estudiantes; los administradores se crean con el seed.
-export const registerStudent = async ({ name, email, grado, grupo, password }) => {
+export const registerStudent = async ({
+  name,
+  email,
+  grado,
+  grupo,
+  password,
+}) => {
   const normalizedEmail = normalizeEmail(email);
   const normalizedName = validateName(name);
   const normalizedGrade = validateGrade(grado);
   const normalizedGroup = validateGroup(normalizedGrade, grupo);
 
   if (!normalizedEmail || !grado || !grupo || !password) {
-    throw appError("Nombre, correo y contrasena son obligatorios; tambien debes indicar grado y grupo. Ingresa tu nombre completo.", 400);
+    throw appError(
+      "Nombre, correo y contrasena son obligatorios; tambien debes indicar grado y grupo. Ingresa tu nombre completo.",
+      400,
+    );
   }
 
   if (String(password).length < 6) {
@@ -92,8 +116,11 @@ export const loginUser = async ({ email, password }) => {
     throw appError("Correo y contrasena son obligatorios.", 400);
   }
 
-  const user = await User.findOne({ email: normalizedEmail }).select("+password");
-  const passwordMatches = user && await bcrypt.compare(password, user.password);
+  const user = await User.findOne({ email: normalizedEmail }).select(
+    "+password",
+  );
+  const passwordMatches =
+    user && (await bcrypt.compare(password, user.password));
 
   if (!passwordMatches) {
     throw appError("Correo o contrasena incorrectos.", 401);
@@ -113,18 +140,29 @@ export const getCurrentUser = async (userId) => {
 };
 
 // Los administradores pueden crear cuentas de ambos roles desde el portal interno.
-export const createUserByAdmin = async ({ name, email, grado, grupo, password, role }) => {
+export const createUserByAdmin = async ({
+  name,
+  email,
+  grado,
+  grupo,
+  password,
+  role,
+}) => {
   const normalizedEmail = normalizeEmail(email);
   const normalizedName = validateName(name);
   const selectedRole = String(role || "").trim();
-  const normalizedGrade = grado === undefined || grado === "" ? undefined : Number(grado);
-  const normalizedGroup = grupo === undefined || grupo === "" ? undefined : Number(grupo);
+  const normalizedGrade =
+    grado === undefined || grado === "" ? undefined : Number(grado);
+  const normalizedGroup =
+    grupo === undefined || grupo === "" ? undefined : Number(grupo);
 
   if (!normalizedEmail || !password || !selectedRole) {
     throw appError("Nombre, correo, contrasena y rol son obligatorios.", 400);
   }
-  if (!["Admin", "Estudiante"].includes(selectedRole)) throw appError("El rol seleccionado no es valido.", 400);
-  if (String(password).length < 6) throw appError("La contrasena debe tener al menos 6 caracteres.", 400);
+  if (!["Admin", "Estudiante"].includes(selectedRole))
+    throw appError("El rol seleccionado no es valido.", 400);
+  if (String(password).length < 6)
+    throw appError("La contrasena debe tener al menos 6 caracteres.", 400);
 
   if (selectedRole === "Estudiante") {
     const validGrade = validateGrade(normalizedGrade);
@@ -135,17 +173,25 @@ export const createUserByAdmin = async ({ name, email, grado, grupo, password, r
   if (exists) throw appError("Ya existe una cuenta con este correo.", 409);
 
   return User.create({
-    name: normalizedName, email: normalizedEmail, password: await bcrypt.hash(password, 12), role: selectedRole,
-    ...(selectedRole === "Estudiante" ? { grado: normalizedGrade, grupo: normalizedGroup } : {}),
+    name: normalizedName,
+    email: normalizedEmail,
+    password: await bcrypt.hash(password, 12),
+    role: selectedRole,
+    ...(selectedRole === "Estudiante"
+      ? { grado: normalizedGrade, grupo: normalizedGroup }
+      : {}),
   });
 };
 
 export const updateOwnStudentProfile = async (userId, payload) => {
-  const invalidFields = Object.keys(payload).filter((field) => field !== "name");
+  const invalidFields = Object.keys(payload).filter(
+    (field) => field !== "name",
+  );
   if (invalidFields.length) {
     throw appError("Solo puedes modificar tu nombre.", 403);
   }
-  if (!Object.hasOwn(payload, "name")) throw appError("Debes enviar el nombre a actualizar.", 400);
+  if (!Object.hasOwn(payload, "name"))
+    throw appError("Debes enviar el nombre a actualizar.", 400);
 
   const user = await User.findOneAndUpdate(
     { _id: userId, role: "Estudiante" },
@@ -158,18 +204,27 @@ export const updateOwnStudentProfile = async (userId, payload) => {
 
 export const updateStudentByAdmin = async (studentId, payload) => {
   const allowedFields = ["name", "grado", "grupo"];
-  const invalidFields = Object.keys(payload).filter((field) => !allowedFields.includes(field));
-  if (invalidFields.length) throw appError("Solo se pueden modificar el nombre, grado y grupo del estudiante.", 400);
-  if (!Object.keys(payload).length) throw appError("Debes enviar datos para actualizar.", 400);
+  const invalidFields = Object.keys(payload).filter(
+    (field) => !allowedFields.includes(field),
+  );
+  if (invalidFields.length)
+    throw appError(
+      "Solo se pueden modificar el nombre, grado y grupo del estudiante.",
+      400,
+    );
+  if (!Object.keys(payload).length)
+    throw appError("Debes enviar datos para actualizar.", 400);
 
   const student = await User.findOne({ _id: studentId, role: "Estudiante" });
   if (!student) throw appError("Estudiante no encontrado.", 404);
 
   const updates = {};
   if (Object.hasOwn(payload, "name")) updates.name = validateName(payload.name);
-  if (Object.hasOwn(payload, "grado")) updates.grado = validateGrade(payload.grado);
+  if (Object.hasOwn(payload, "grado"))
+    updates.grado = validateGrade(payload.grado);
   const resultingGrade = updates.grado ?? student.grado;
-  if (Object.hasOwn(payload, "grupo")) updates.grupo = validateGroup(resultingGrade, payload.grupo);
+  if (Object.hasOwn(payload, "grupo"))
+    updates.grupo = validateGroup(resultingGrade, payload.grupo);
   else validateGroup(resultingGrade, student.grupo);
 
   student.set(updates);
@@ -179,18 +234,28 @@ export const updateStudentByAdmin = async (studentId, payload) => {
 
 const getOtherAdmin = async (adminId, actorId) => {
   if (String(adminId) === String(actorId)) {
-    throw appError("No puedes modificar ni eliminar tu propia cuenta desde esta sección.", 403);
+    throw appError(
+      "No puedes modificar ni eliminar tu propia cuenta desde esta sección.",
+      403,
+    );
   }
-  const admin = await User.findOne({ _id: adminId, role: "Admin" }).select("+password");
+  const admin = await User.findOne({ _id: adminId, role: "Admin" }).select(
+    "+password",
+  );
   if (!admin) throw appError("Administrador no encontrado.", 404);
   return admin;
 };
 
 export const updateOtherAdmin = async (adminId, actorId, payload) => {
   const allowedFields = ["name", "email", "password"];
-  const invalidFields = Object.keys(payload).filter((field) => !allowedFields.includes(field));
+  const invalidFields = Object.keys(payload).filter(
+    (field) => !allowedFields.includes(field),
+  );
   if (invalidFields.length || !Object.keys(payload).length) {
-    throw appError("Solo se pueden modificar el nombre, correo o contraseña del administrador.", 400);
+    throw appError(
+      "Solo se pueden modificar el nombre, correo o contraseña del administrador.",
+      400,
+    );
   }
 
   const admin = await getOtherAdmin(adminId, actorId);
@@ -199,11 +264,13 @@ export const updateOtherAdmin = async (adminId, actorId, payload) => {
     const email = normalizeEmail(payload.email);
     if (!email) throw appError("El correo es obligatorio.", 400);
     const alreadyExists = await User.exists({ email, _id: { $ne: admin._id } });
-    if (alreadyExists) throw appError("Ya existe una cuenta con este correo.", 409);
+    if (alreadyExists)
+      throw appError("Ya existe una cuenta con este correo.", 409);
     admin.email = email;
   }
   if (Object.hasOwn(payload, "password")) {
-    if (String(payload.password).length < 6) throw appError("La contraseña debe tener al menos 6 caracteres.", 400);
+    if (String(payload.password).length < 6)
+      throw appError("La contraseña debe tener al menos 6 caracteres.", 400);
     admin.password = await bcrypt.hash(payload.password, 12);
   }
 
@@ -217,9 +284,31 @@ export const deleteOtherAdmin = async (adminId, actorId) => {
   return admin;
 };
 
-export const listStudents = async ({ page = 1, limit = 10, search = "" } = {}) => {
+export const deleteUserByAdmin = async (userId, actorId) => {
+  if (String(userId) === String(actorId)) {
+    throw appError(
+      "No puedes eliminar tu propia cuenta desde esta sección.",
+      403,
+    );
+  }
+
+  const user = await User.findById(userId);
+  if (!user) throw appError("Usuario no encontrado.", 404);
+
+  await user.deleteOne();
+  return user;
+};
+
+export const listStudents = async ({
+  page = 1,
+  limit = 10,
+  search = "",
+} = {}) => {
   const safePage = Math.max(1, Number.parseInt(page, 10) || 1);
-  const safeLimit = Math.min(100, Math.max(1, Number.parseInt(limit, 10) || 10));
+  const safeLimit = Math.min(
+    100,
+    Math.max(1, Number.parseInt(limit, 10) || 10),
+  );
   const filter = { role: "Estudiante" };
 
   if (String(search).trim()) {
@@ -231,27 +320,66 @@ export const listStudents = async ({ page = 1, limit = 10, search = "" } = {}) =
   }
 
   const [students, total] = await Promise.all([
-    User.find(filter).select("name email grado grupo role isActive createdAt").sort({ createdAt: -1 })
-      .skip((safePage - 1) * safeLimit).limit(safeLimit),
+    User.find(filter)
+      .select("name email grado grupo role isActive createdAt")
+      .sort({ createdAt: -1 })
+      .skip((safePage - 1) * safeLimit)
+      .limit(safeLimit),
     User.countDocuments(filter),
   ]);
 
-  return { students, total, page: safePage, limit: safeLimit, pages: Math.max(1, Math.ceil(total / safeLimit)) };
+  return {
+    students,
+    total,
+    page: safePage,
+    limit: safeLimit,
+    pages: Math.max(1, Math.ceil(total / safeLimit)),
+  };
 };
 
 export const listUsers = async ({ page = 1, limit = 10, search = "" } = {}) => {
   const safePage = Math.max(1, Number.parseInt(page, 10) || 1);
-  const safeLimit = Math.min(100, Math.max(1, Number.parseInt(limit, 10) || 10));
+  const safeLimit = Math.min(
+    100,
+    Math.max(1, Number.parseInt(limit, 10) || 10),
+  );
   const filter = {};
   if (String(search).trim()) {
     const query = String(search).trim();
-    filter.$or = [{ name: { $regex: query, $options: "i" } }, { email: { $regex: query, $options: "i" } }];
+    filter.$or = [
+      { name: { $regex: query, $options: "i" } },
+      { email: { $regex: query, $options: "i" } },
+    ];
   }
   const [users, total] = await Promise.all([
-    User.find(filter).select("name email grado grupo role isActive createdAt").sort({ createdAt: -1 }).skip((safePage - 1) * safeLimit).limit(safeLimit),
+    User.find(filter)
+      .select("name email grado grupo role isActive createdAt")
+      .sort({ createdAt: -1 })
+      .skip((safePage - 1) * safeLimit)
+      .limit(safeLimit),
     User.countDocuments(filter),
   ]);
-  return { users, total, page: safePage, limit: safeLimit, pages: Math.max(1, Math.ceil(total / safeLimit)) };
+  return {
+    users,
+    total,
+    page: safePage,
+    limit: safeLimit,
+    pages: Math.max(1, Math.ceil(total / safeLimit)),
+  };
 };
 
-export default { createToken, createUserByAdmin, deleteOtherAdmin, getCurrentUser, listStudents, listUsers, loginUser, registerStudent, sanitizeUser, updateOtherAdmin, updateOwnStudentProfile, updateStudentByAdmin };
+export default {
+  createToken,
+  createUserByAdmin,
+  deleteOtherAdmin,
+  deleteUserByAdmin,
+  getCurrentUser,
+  listStudents,
+  listUsers,
+  loginUser,
+  registerStudent,
+  sanitizeUser,
+  updateOtherAdmin,
+  updateOwnStudentProfile,
+  updateStudentByAdmin,
+};
