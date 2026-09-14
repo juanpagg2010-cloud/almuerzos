@@ -53,6 +53,16 @@ $("#close-admin-modal").addEventListener("click", closeAdminForm);
 $("#user-role").addEventListener("change", toggleStudentFields);
 $("#user-grade").addEventListener("input", syncNewUserGroupLimit);
 $("#edit-student-grade").addEventListener("change", () => syncStudentGroups());
+$("#rubric-filters").addEventListener("submit", (event) => {
+  event.preventDefault();
+  loadRubric();
+});
+$("#download-rubric").addEventListener("click", downloadRubric);
+// Keeps the open administrative report current as students confirm from their
+// own devices. The database remains the single source of truth.
+setInterval(() => {
+  if (!$("#rubric-view").classList.contains("hidden")) loadRubric();
+}, 30000);
 $("#previous").addEventListener("click", () => {
   page -= 1;
   loadUsers();
@@ -76,6 +86,74 @@ function changeView(view) {
   if (view === "overview") loadOverview();
   if (view === "menus") loadMenus();
   if (view === "users") loadUsers();
+  if (view === "rubric") loadRubric();
+}
+
+function rubricQuery() {
+  const params = new URLSearchParams();
+  const form = new FormData($("#rubric-filters"));
+  for (const [key, value] of form.entries()) if (value) params.set(key, value);
+  return params.toString();
+}
+
+function renderRubricSummary(target, values, emptyMessage) {
+  clear(target);
+  const entries = Object.entries(values);
+  if (!entries.length) {
+    target.append(make("p", emptyMessage, "text-slate-400"));
+    return;
+  }
+  entries.forEach(([label, total]) => {
+    const item = make("div", undefined, "flex justify-between gap-3 border-b border-slate-100 pb-2 last:border-0");
+    item.append(make("span", label), make("strong", total));
+    target.append(item);
+  });
+}
+
+async function loadRubric() {
+  try {
+    const query = rubricQuery();
+    const report = await api(`/attendance/rubric${query ? `?${query}` : ""}`);
+    $("#rubric-total").textContent = report.totalRegistros;
+    $("#rubric-attending").textContent = report.totalAsistentes;
+    $("#rubric-absent").textContent = report.totalNoAsistentes;
+    renderRubricSummary($("#rubric-by-grade"), report.byGrade, "Sin registros por grado.");
+    renderRubricSummary($("#rubric-by-group"), report.byGroup, "Sin registros por grupo.");
+    const body = $("#rubric-body");
+    clear(body);
+    report.records.forEach((record, index) => {
+      const row = make("tr", undefined, "border-t");
+      row.append(
+        make("td", index + 1, "p-5"),
+        make("td", record.nombre, "p-5 font-semibold"),
+        make("td", `${record.grado}°`, "p-5"),
+        make("td", `Grupo ${record.grupo}`, "p-5"),
+        make("td", record.fechaConfirmacion, "p-5"),
+        make("td", record.horaConfirmacion, "p-5 font-mono"),
+        make("td", record.estado, `p-5 font-semibold ${record.asistira ? "text-emerald-700" : "text-rose-700"}`),
+      );
+      body.append(row);
+    });
+    $("#rubric-empty").classList.toggle("hidden", report.records.length > 0);
+  } catch (error) { notify(error.message, true); }
+}
+
+async function downloadRubric() {
+  try {
+    const { token } = getSession();
+    const query = rubricQuery();
+    const response = await fetch(`${API_URL}/attendance/rubric.csv${query ? `?${query}` : ""}`, { headers: { Authorization: `Bearer ${token}` } });
+    if (!response.ok) {
+      const payload = await response.json().catch(() => ({}));
+      throw new Error(payload.message || "No se pudo descargar la rúbrica.");
+    }
+    const file = await response.blob();
+    const url = URL.createObjectURL(file);
+    const link = document.createElement("a");
+    link.href = url; link.download = "rubrica-asistencia.csv"; link.click();
+    URL.revokeObjectURL(url);
+    notify("Rúbrica descargada correctamente.");
+  } catch (error) { notify(error.message, true); }
 }
 
 async function loadOverview() {

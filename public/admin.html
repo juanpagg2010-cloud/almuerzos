@@ -43,6 +43,11 @@
             class="nav-link w-full px-3 py-3 rounded-xl text-left text-sm font-semibold"
           >
             ⌑ Usuarios
+          </button><button
+            data-view="rubric"
+            class="nav-link w-full px-3 py-3 rounded-xl text-left text-sm font-semibold"
+          >
+            ▤ Rúbrica de asistencia
           </button>
         </nav>
         <div class="mt-auto glass rounded-2xl p-3 flex gap-3 items-center">
@@ -218,6 +223,36 @@
                 </button>
               </div>
             </div>
+          </section>
+          <section id="rubric-view" class="view hidden">
+            <div class="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-end mb-8">
+              <div>
+                <p class="text-brand-600 text-sm font-bold uppercase tracking-wider">Reporte institucional</p>
+                <h1 class="display text-3xl font-extrabold mt-1">Rúbrica de asistencia</h1>
+                <p class="text-slate-500 mt-2">Consulta la fecha y hora exacta registrada por el servidor en cada confirmación.</p>
+              </div>
+              <button id="download-rubric" type="button" class="w-full sm:w-auto bg-emerald-600 text-white rounded-xl px-5 py-3 font-bold">↓ Descargar rúbrica</button>
+            </div>
+            <form id="rubric-filters" class="bg-white panel rounded-2xl p-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+              <label class="text-sm font-semibold">Fecha de confirmación<input id="rubric-date" name="fecha" type="date" class="mt-2 w-full border rounded-xl px-3 py-3" /></label>
+              <label class="text-sm font-semibold">Grado<select id="rubric-grade" name="grado" class="mt-2 w-full border rounded-xl px-3 py-3"><option value="">Todos los grados</option><option value="1">1°</option><option value="2">2°</option><option value="3">3°</option><option value="4">4°</option><option value="5">5°</option><option value="6">6°</option><option value="7">7°</option><option value="8">8°</option><option value="9">9°</option><option value="10">10°</option><option value="11">11°</option></select></label>
+              <label class="text-sm font-semibold">Grupo<select id="rubric-group" name="grupo" class="mt-2 w-full border rounded-xl px-3 py-3"><option value="">Todos los grupos</option><option value="1">Grupo 1</option><option value="2">Grupo 2</option><option value="3">Grupo 3</option><option value="4">Grupo 4</option><option value="5">Grupo 5</option><option value="6">Grupo 6</option><option value="7">Grupo 7</option><option value="8">Grupo 8</option></select></label>
+              <label class="text-sm font-semibold">Orden por hora<select id="rubric-order" name="orden" class="mt-2 w-full border rounded-xl px-3 py-3"><option value="desc">Más reciente primero</option><option value="asc">Más antigua primero</option></select></label>
+              <button class="sm:col-span-2 xl:col-span-4 bg-brand-600 text-white rounded-xl px-5 py-3 font-bold">Aplicar filtros</button>
+            </form>
+            <div class="grid sm:grid-cols-3 gap-4 mt-6">
+              <div class="bg-white panel rounded-2xl p-5"><p id="rubric-total" class="text-2xl font-extrabold"></p><p class="text-sm text-slate-500">Estudiantes registrados</p></div>
+              <div class="bg-white panel rounded-2xl p-5"><p id="rubric-attending" class="text-2xl font-extrabold text-emerald-600"></p><p class="text-sm text-slate-500">Sí asistirán</p></div>
+              <div class="bg-white panel rounded-2xl p-5"><p id="rubric-absent" class="text-2xl font-extrabold text-rose-600"></p><p class="text-sm text-slate-500">No asistirán</p></div>
+            </div>
+            <div class="grid lg:grid-cols-2 gap-5 mt-6">
+              <section class="bg-white panel rounded-2xl p-5"><h2 class="font-bold">Por grado</h2><div id="rubric-by-grade" class="mt-3 space-y-2 text-sm"></div></section>
+              <section class="bg-white panel rounded-2xl p-5"><h2 class="font-bold">Por grupo</h2><div id="rubric-by-group" class="mt-3 space-y-2 text-sm"></div></section>
+            </div>
+            <section class="bg-white panel rounded-3xl overflow-hidden mt-6">
+              <div class="table-scroll overflow-x-auto"><table class="responsive-table min-w-[860px] w-full text-sm"><thead class="bg-slate-50 text-slate-500"><tr><th class="text-left p-5">#</th><th class="text-left p-5">Nombre completo</th><th class="text-left p-5">Grado</th><th class="text-left p-5">Grupo</th><th class="text-left p-5">Fecha</th><th class="text-left p-5">Hora de confirmación</th><th class="text-left p-5">Estado</th></tr></thead><tbody id="rubric-body"></tbody></table></div>
+              <p id="rubric-empty" class="hidden p-10 text-center text-slate-500">No hay confirmaciones para estos filtros.</p>
+            </section>
           </section>
         </section>
       </main>
