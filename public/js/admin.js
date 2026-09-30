@@ -22,6 +22,7 @@ if (!user || user.role !== "Admin") window.location.href = "/";
 let menus = [];
 let page = 1;
 let serverNow = new Date();
+let selectedMetricsPeriod = "day";
 
 $("#user-name").textContent = user.name;
 $("#user-initial").textContent = user.name[0];
@@ -41,8 +42,26 @@ document
     button.addEventListener("click", () => changeView(button.dataset.view)),
   );
 $("#overview-new-menu").addEventListener("click", () => openMenuForm());
-$("#today-metrics").addEventListener("click", () => changeView("metrics"));
-$("#refresh-metrics").addEventListener("click", loadTodayMetrics);
+$("#metrics-menu-toggle").addEventListener("click", toggleMetricsMenu);
+$("#refresh-metrics").addEventListener("click", loadMetrics);
+$("#metrics-period-select").addEventListener("change", (event) => {
+  selectedMetricsPeriod = event.target.value;
+  loadMetrics();
+});
+document.querySelectorAll("[data-metrics-period]").forEach((button) => {
+  button.addEventListener("click", () => {
+    selectedMetricsPeriod = button.dataset.metricsPeriod;
+    $("#metrics-period-select").value = selectedMetricsPeriod;
+    closeMetricsMenu();
+    changeView("metrics");
+  });
+});
+document.addEventListener("click", (event) => {
+  if (!event.target.closest("#metrics-menu") && !event.target.closest("#metrics-menu-toggle")) closeMetricsMenu();
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") closeMetricsMenu();
+});
 $("#new-menu").addEventListener("click", () => openMenuForm());
 $("#close-modal").addEventListener("click", closeMenuForm);
 $("#menu-form").addEventListener("submit", saveMenu);
@@ -65,7 +84,7 @@ $("#download-rubric").addEventListener("click", downloadRubric);
 // own devices. The database remains the single source of truth.
 setInterval(() => {
   if (!$("#rubric-view").classList.contains("hidden")) loadRubric();
-  if (!$("#metrics-view").classList.contains("hidden")) loadTodayMetrics();
+  if (!$("#metrics-view").classList.contains("hidden")) loadMetrics();
 }, 30000);
 $("#previous").addEventListener("click", () => {
   page -= 1;
@@ -91,7 +110,18 @@ function changeView(view) {
   if (view === "menus") loadMenus();
   if (view === "users") loadUsers();
   if (view === "rubric") loadRubric();
-  if (view === "metrics") loadTodayMetrics();
+  if (view === "metrics") loadMetrics();
+}
+
+function closeMetricsMenu() {
+  $("#metrics-menu").classList.add("hidden");
+  $("#metrics-menu-toggle").setAttribute("aria-expanded", "false");
+}
+
+function toggleMetricsMenu() {
+  const menu = $("#metrics-menu");
+  const isHidden = menu.classList.toggle("hidden");
+  $("#metrics-menu-toggle").setAttribute("aria-expanded", String(!isHidden));
 }
 
 function renderMetricBars(target, values, emptyMessage, colorClass) {
@@ -123,13 +153,14 @@ function renderMetricBars(target, values, emptyMessage, colorClass) {
   });
 }
 
-async function loadTodayMetrics() {
+async function loadMetrics() {
   try {
-    const metrics = await api("/attendance/metrics/today");
+    const metrics = await api(`/attendance/metrics?period=${encodeURIComponent(selectedMetricsPeriod)}`);
+    $("#metrics-title").textContent = `Métricas ${metrics.periodLabel}`;
     $("#metrics-date").textContent =
-      `Información correspondiente al ${metrics.fechaActual}.`;
+      `Información del ${metrics.startDate} al ${metrics.endDate}.`;
     $("#metrics-new-students").textContent =
-      metrics.totalEstudiantesRegistradosHoy;
+      metrics.totalEstudiantesRegistradosPeriodo;
     $("#metrics-confirmed").textContent = metrics.totalAlmuerzosConfirmados;
     $("#metrics-unconfirmed").textContent =
       metrics.totalEstudiantesSinConfirmar;
@@ -138,25 +169,25 @@ async function loadTodayMetrics() {
       metrics.totalEstudiantesConRespuesta;
     $("#metrics-active-students").textContent = metrics.totalEstudiantesActivos;
     $("#metrics-response-detail").textContent =
-      `${metrics.totalEstudiantesConRespuesta} de ${metrics.totalEstudiantesActivos} estudiantes activos respondieron hoy.`;
+      `${metrics.totalEstudiantesConRespuesta} de ${metrics.totalEstudiantesActivos} estudiantes activos respondieron en este período.`;
     $("#metrics-donut-value").textContent =
       `${metrics.porcentajeConfirmacion}%`;
     $("#metrics-donut").style.background =
       `conic-gradient(#2563eb ${metrics.porcentajeConfirmacion}%, #e2e8f0 0)`;
     $("#metrics-summary").textContent =
-      `${metrics.totalRegistrosDia} registro(s) de confirmación hoy: ${metrics.totalAlmuerzosConfirmados} confirmado(s). ${metrics.totalEstudiantesSinConfirmar} estudiante(s) activo(s) aún no han respondido.`;
+      `${metrics.totalRegistrosDia} registro(s) de confirmación: ${metrics.totalAlmuerzosConfirmados} confirmado(s). ${metrics.totalEstudiantesSinConfirmar} estudiante(s) activo(s) aún no han respondido en este período.`;
     $("#metrics-table-detail").textContent =
       `${metrics.totalRegistrosDia} registro(s) ordenados de la confirmación más reciente a la más antigua.`;
     renderMetricBars(
       $("#metrics-by-grade"),
       metrics.byGrade,
-      "Sin registros por grado hoy.",
+      "Sin registros por grado en este período.",
       "bg-brand-600",
     );
     renderMetricBars(
       $("#metrics-by-group"),
       metrics.byGroup,
-      "Sin registros por grupo hoy.",
+      "Sin registros por grupo en este período.",
       "bg-emerald-500",
     );
     const body = $("#metrics-body");
@@ -168,6 +199,7 @@ async function loadTodayMetrics() {
         make("td", record.nombre, "p-5 font-semibold"),
         make("td", `${record.grado}°`, "p-5"),
         make("td", `Grupo ${record.grupo}`, "p-5"),
+        make("td", record.fechaConfirmacion, "p-5"),
         make("td", record.horaConfirmacion, "p-5 font-mono"),
         make(
           "td",

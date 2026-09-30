@@ -136,6 +136,38 @@ const buildSummary = (records) => {
   return { byGrade, byGroup };
 };
 
+const METRICS_PERIODS = {
+  day: "del día",
+  week: "de esta semana",
+  month: "de este mes",
+  year: "de este año",
+  six_months: "de los últimos 6 meses",
+};
+
+const dateValueFromUtc = (date) => date.toISOString().slice(0, 10);
+
+const getMetricsRange = (period = "day") => {
+  if (!Object.hasOwn(METRICS_PERIODS, period)) {
+    throw appError("El período de métricas no es válido.", 400);
+  }
+
+  const endDate = getDateValue(new Date());
+  const [year, month, day] = endDate.split("-").map(Number);
+  const start = new Date(Date.UTC(year, month - 1, day));
+
+  if (period === "week") start.setUTCDate(start.getUTCDate() - ((start.getUTCDay() + 6) % 7));
+  if (period === "month") start.setUTCDate(1);
+  if (period === "year") start.setUTCMonth(0, 1);
+  if (period === "six_months") {
+    start.setUTCDate(1);
+    start.setUTCMonth(start.getUTCMonth() - 5);
+    const daysInMonth = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth() + 1, 0)).getUTCDate();
+    start.setUTCDate(Math.min(day, daysInMonth));
+  }
+
+  return { period, periodLabel: METRICS_PERIODS[period], startDate: dateValueFromUtc(start), endDate };
+};
+
 // This reads the original attendance documents. updatedAt is written by
 // MongoDB/Mongoose at the exact server-side moment a student confirms or updates
 // their response; clients never send or control this value.
@@ -189,11 +221,15 @@ export const getAttendanceRubric = async (query = {}) => {
   };
 };
 
-// Daily dashboard metrics deliberately use the same confirmation documents as
-// the attendance rubric.  The day is calculated on the server in the app time
-// zone, so a device's clock cannot move a record to a different day.
-export const getTodayMetrics = async () => {
-  const today = getDateValue(new Date());
+// Dashboard metrics deliberately use the same confirmation documents as the
+// attendance rubric. The range is calculated on the server in the app time
+// zone, so a device's clock cannot move a record to another period.
+export const getMetrics = async (period) => {
+  const range = getMetricsRange(period);
+  const isInRange = (date) => {
+    const dateValue = getDateValue(date);
+    return dateValue >= range.startDate && dateValue <= range.endDate;
+  };
   const [confirmations, students] = await Promise.all([
     AttendanceConfirmation.find()
       .populate("estudianteId", "name grado grupo")
@@ -208,7 +244,7 @@ export const getTodayMetrics = async () => {
     .filter(
       (confirmation) =>
         confirmation.estudianteId &&
-        getDateValue(confirmation.updatedAt) === today,
+        isInRange(confirmation.updatedAt),
     )
     .map((confirmation) => ({
       id: String(confirmation._id),
@@ -219,6 +255,7 @@ export const getTodayMetrics = async () => {
       menu: confirmation.menuId?.platoPrincipal || "Menú eliminado",
       fechaAlmuerzo: confirmation.menuId?.fecha || null,
       confirmedAt: confirmation.updatedAt,
+      fechaConfirmacion: displayDate.format(confirmation.updatedAt),
       horaConfirmacion: displayTime.format(confirmation.updatedAt),
       estado: confirmation.asistira ? "Confirmado" : "No asistirá",
       asistira: confirmation.asistira,
@@ -232,15 +269,13 @@ export const getTodayMetrics = async () => {
   const studentResponses = new Set(records.map((record) => record.studentId));
   const totalStudents = activeStudents.length;
   const totalWithResponse = studentResponses.size;
-  const totalNewStudentsToday = students.filter(
-    (student) => getDateValue(student.createdAt) === today,
-  ).length;
+  const totalNewStudents = students.filter((student) => isInRange(student.createdAt)).length;
   const summary = buildSummary(records);
 
   return {
-    fechaActual: today,
+    ...range,
     generatedAt: new Date().toISOString(),
-    totalEstudiantesRegistradosHoy: totalNewStudentsToday,
+    totalEstudiantesRegistradosPeriodo: totalNewStudents,
     totalEstudiantesActivos: totalStudents,
     totalRegistrosDia: records.length,
     totalEstudiantesConRespuesta: totalWithResponse,
@@ -258,10 +293,14 @@ export const getTodayMetrics = async () => {
   };
 };
 
+// Kept for existing consumers of the original daily endpoint.
+export const getTodayMetrics = () => getMetrics("day");
+
 export default {
   confirmAttendance,
   getAttendanceRubric,
   getMenuConfirmations,
   getMyConfirmations,
+  getMetrics,
   getTodayMetrics,
 };

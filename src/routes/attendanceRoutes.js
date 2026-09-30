@@ -81,6 +81,19 @@ router.get("/rubric.csv", authorizeRoles(ADMIN), async (req, res) => {
   }
 });
 
+router.get("/metrics", authorizeRoles(ADMIN), async (req, res) => {
+  try {
+    const metrics = await attendanceService.getMetrics(req.query.period);
+    return res.status(200).json({ ok: true, ...metrics });
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({
+      ok: false,
+      message: error.message || "No se pudieron cargar las métricas.",
+    });
+  }
+});
+
+// Preserves the original daily endpoint for any existing client.
 router.get("/metrics/today", authorizeRoles(ADMIN), async (req, res) => {
   try {
     const metrics = await attendanceService.getTodayMetrics();
