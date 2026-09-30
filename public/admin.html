@@ -34,6 +34,11 @@
           >
             ▦ Resumen</button
           ><button
+            data-view="metrics"
+            class="nav-link w-full px-3 py-3 rounded-xl text-left text-sm font-semibold"
+          >
+            ▥ Métricas del día</button
+          ><button
             data-view="menus"
             class="nav-link w-full px-3 py-3 rounded-xl text-left text-sm font-semibold"
           >
@@ -42,8 +47,8 @@
             data-view="users"
             class="nav-link w-full px-3 py-3 rounded-xl text-left text-sm font-semibold"
           >
-            ⌑ Usuarios
-          </button><button
+            ⌑ Usuarios</button
+          ><button
             data-view="rubric"
             class="nav-link w-full px-3 py-3 rounded-xl text-left text-sm font-semibold"
           >
@@ -108,12 +113,21 @@
                   Así avanza el servicio de alimentación.
                 </p>
               </div>
-              <button
-                id="overview-new-menu"
-                class="w-full sm:w-auto bg-brand-600 text-white rounded-xl px-4 py-3 font-bold text-sm"
-              >
-                ＋ Crear menú
-              </button>
+              <div class="w-full sm:w-auto flex flex-col sm:flex-row gap-3">
+                <button
+                  id="today-metrics"
+                  type="button"
+                  class="w-full sm:w-auto bg-white border border-brand-200 text-brand-700 rounded-xl px-4 py-3 font-bold text-sm"
+                >
+                  ▥ Métricas del día
+                </button>
+                <button
+                  id="overview-new-menu"
+                  class="w-full sm:w-auto bg-brand-600 text-white rounded-xl px-4 py-3 font-bold text-sm"
+                >
+                  ＋ Crear menú
+                </button>
+              </div>
             </div>
             <div class="grid sm:grid-cols-2 xl:grid-cols-4 gap-4">
               <div class="bg-white panel rounded-2xl p-5">
@@ -145,6 +159,154 @@
             <section class="panel bg-white rounded-3xl p-6 mt-7">
               <h2 class="display font-bold text-xl">Respuestas recientes</h2>
               <div id="recent-list" class="mt-5 divide-y"></div>
+            </section>
+          </section>
+          <section id="metrics-view" class="view hidden">
+            <div
+              class="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-end mb-8"
+            >
+              <div>
+                <p
+                  class="text-brand-600 text-sm font-bold uppercase tracking-wider"
+                >
+                  Seguimiento diario
+                </p>
+                <h1 class="display text-3xl font-extrabold mt-1">
+                  Métricas del día
+                </h1>
+                <p id="metrics-date" class="text-slate-500 mt-2">
+                  Cargando las métricas de hoy…
+                </p>
+              </div>
+              <button
+                id="refresh-metrics"
+                type="button"
+                class="w-full sm:w-auto bg-white border border-brand-200 text-brand-700 rounded-xl px-5 py-3 font-bold"
+              >
+                ↻ Actualizar
+              </button>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+              <section class="bg-white panel rounded-2xl p-5">
+                <p
+                  id="metrics-new-students"
+                  class="text-2xl font-extrabold"
+                ></p>
+                <p class="text-sm text-slate-500">
+                  Estudiantes registrados hoy
+                </p>
+              </section>
+              <section class="bg-white panel rounded-2xl p-5">
+                <p
+                  id="metrics-confirmed"
+                  class="text-2xl font-extrabold text-emerald-600"
+                ></p>
+                <p class="text-sm text-slate-500">Almuerzos confirmados</p>
+              </section>
+              <section class="bg-white panel rounded-2xl p-5">
+                <p
+                  id="metrics-unconfirmed"
+                  class="text-2xl font-extrabold text-rose-600"
+                ></p>
+                <p class="text-sm text-slate-500">Estudiantes sin confirmar</p>
+              </section>
+              <section class="bg-white panel rounded-2xl p-5">
+                <p
+                  id="metrics-percentage"
+                  class="text-2xl font-extrabold text-brand-600"
+                ></p>
+                <p class="text-sm text-slate-500">Porcentaje de confirmación</p>
+              </section>
+            </div>
+            <div class="grid lg:grid-cols-2 gap-5 mt-6">
+              <section class="bg-white panel rounded-3xl p-5">
+                <div class="flex items-center justify-between gap-4">
+                  <div>
+                    <h2 class="font-bold text-lg">Respuestas y pendientes</h2>
+                    <p
+                      id="metrics-response-detail"
+                      class="text-sm text-slate-500 mt-1"
+                    ></p>
+                  </div>
+                  <div
+                    id="metrics-donut"
+                    class="w-24 h-24 rounded-full shrink-0 grid place-items-center"
+                  >
+                    <div
+                      class="w-16 h-16 rounded-full bg-white grid place-items-center"
+                    >
+                      <strong id="metrics-donut-value" class="text-sm"></strong>
+                    </div>
+                  </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3 mt-6 text-sm">
+                  <div class="rounded-xl bg-emerald-50 p-3 text-emerald-800">
+                    <strong id="metrics-confirmed-students"></strong>
+                    <p>Con respuesta</p>
+                  </div>
+                  <div class="rounded-xl bg-rose-50 p-3 text-rose-800">
+                    <strong id="metrics-active-students"></strong>
+                    <p>Estudiantes activos</p>
+                  </div>
+                </div>
+              </section>
+              <section class="bg-white panel rounded-3xl p-5">
+                <h2 class="font-bold text-lg">Resumen del día</h2>
+                <p
+                  id="metrics-summary"
+                  class="text-sm text-slate-600 leading-6 mt-3"
+                ></p>
+                <p class="text-xs text-slate-400 mt-4">
+                  Se actualiza automáticamente cada 30 segundos mientras esta
+                  sección está abierta.
+                </p>
+              </section>
+            </div>
+            <div class="grid lg:grid-cols-2 gap-5 mt-6">
+              <section class="bg-white panel rounded-3xl p-5">
+                <h2 class="font-bold text-lg">Registros por grado</h2>
+                <p class="text-sm text-slate-500 mt-1">
+                  Confirmaciones realizadas hoy.
+                </p>
+                <div id="metrics-by-grade" class="mt-5 space-y-4"></div>
+              </section>
+              <section class="bg-white panel rounded-3xl p-5">
+                <h2 class="font-bold text-lg">Registros por grupo</h2>
+                <p class="text-sm text-slate-500 mt-1">
+                  Confirmaciones realizadas hoy.
+                </p>
+                <div id="metrics-by-group" class="mt-5 space-y-4"></div>
+              </section>
+            </div>
+            <section class="bg-white panel rounded-3xl overflow-hidden mt-6">
+              <div class="p-5 border-b">
+                <h2 class="font-bold text-lg">Registros de hoy</h2>
+                <p
+                  id="metrics-table-detail"
+                  class="text-sm text-slate-500 mt-1"
+                ></p>
+              </div>
+              <div class="table-scroll overflow-x-auto">
+                <table class="responsive-table min-w-[760px] w-full text-sm">
+                  <thead class="bg-slate-50 text-slate-500">
+                    <tr>
+                      <th class="text-left p-5">#</th>
+                      <th class="text-left p-5">Nombre</th>
+                      <th class="text-left p-5">Grado</th>
+                      <th class="text-left p-5">Grupo</th>
+                      <th class="text-left p-5">Hora exacta</th>
+                      <th class="text-left p-5">Estado</th>
+                    </tr>
+                  </thead>
+                  <tbody id="metrics-body"></tbody>
+                </table>
+              </div>
+              <p
+                id="metrics-empty"
+                class="hidden p-10 text-center text-slate-500"
+              >
+                Todavía no hay registros de confirmación hoy.
+              </p>
             </section>
           </section>
           <section id="menus-view" class="view hidden">
@@ -225,33 +387,148 @@
             </div>
           </section>
           <section id="rubric-view" class="view hidden">
-            <div class="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-end mb-8">
+            <div
+              class="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-end mb-8"
+            >
               <div>
-                <p class="text-brand-600 text-sm font-bold uppercase tracking-wider">Reporte institucional</p>
-                <h1 class="display text-3xl font-extrabold mt-1">Rúbrica de asistencia</h1>
-                <p class="text-slate-500 mt-2">Consulta la fecha y hora exacta registrada por el servidor en cada confirmación.</p>
+                <p
+                  class="text-brand-600 text-sm font-bold uppercase tracking-wider"
+                >
+                  Reporte institucional
+                </p>
+                <h1 class="display text-3xl font-extrabold mt-1">
+                  Rúbrica de asistencia
+                </h1>
+                <p class="text-slate-500 mt-2">
+                  Consulta la fecha y hora exacta registrada por el servidor en
+                  cada confirmación.
+                </p>
               </div>
-              <button id="download-rubric" type="button" class="w-full sm:w-auto bg-emerald-600 text-white rounded-xl px-5 py-3 font-bold">↓ Descargar rúbrica</button>
+              <button
+                id="download-rubric"
+                type="button"
+                class="w-full sm:w-auto bg-emerald-600 text-white rounded-xl px-5 py-3 font-bold"
+              >
+                ↓ Descargar rúbrica
+              </button>
             </div>
-            <form id="rubric-filters" class="bg-white panel rounded-2xl p-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-              <label class="text-sm font-semibold">Fecha de confirmación<input id="rubric-date" name="fecha" type="date" class="mt-2 w-full border rounded-xl px-3 py-3" /></label>
-              <label class="text-sm font-semibold">Grado<select id="rubric-grade" name="grado" class="mt-2 w-full border rounded-xl px-3 py-3"><option value="">Todos los grados</option><option value="1">1°</option><option value="2">2°</option><option value="3">3°</option><option value="4">4°</option><option value="5">5°</option><option value="6">6°</option><option value="7">7°</option><option value="8">8°</option><option value="9">9°</option><option value="10">10°</option><option value="11">11°</option></select></label>
-              <label class="text-sm font-semibold">Grupo<select id="rubric-group" name="grupo" class="mt-2 w-full border rounded-xl px-3 py-3"><option value="">Todos los grupos</option><option value="1">Grupo 1</option><option value="2">Grupo 2</option><option value="3">Grupo 3</option><option value="4">Grupo 4</option><option value="5">Grupo 5</option><option value="6">Grupo 6</option><option value="7">Grupo 7</option><option value="8">Grupo 8</option></select></label>
-              <label class="text-sm font-semibold">Orden por hora<select id="rubric-order" name="orden" class="mt-2 w-full border rounded-xl px-3 py-3"><option value="desc">Más reciente primero</option><option value="asc">Más antigua primero</option></select></label>
-              <button class="sm:col-span-2 xl:col-span-4 bg-brand-600 text-white rounded-xl px-5 py-3 font-bold">Aplicar filtros</button>
+            <form
+              id="rubric-filters"
+              class="bg-white panel rounded-2xl p-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4"
+            >
+              <label class="text-sm font-semibold"
+                >Fecha de confirmación<input
+                  id="rubric-date"
+                  name="fecha"
+                  type="date"
+                  class="mt-2 w-full border rounded-xl px-3 py-3"
+              /></label>
+              <label class="text-sm font-semibold"
+                >Grado<select
+                  id="rubric-grade"
+                  name="grado"
+                  class="mt-2 w-full border rounded-xl px-3 py-3"
+                >
+                  <option value="">Todos los grados</option>
+                  <option value="1">1°</option>
+                  <option value="2">2°</option>
+                  <option value="3">3°</option>
+                  <option value="4">4°</option>
+                  <option value="5">5°</option>
+                  <option value="6">6°</option>
+                  <option value="7">7°</option>
+                  <option value="8">8°</option>
+                  <option value="9">9°</option>
+                  <option value="10">10°</option>
+                  <option value="11">11°</option>
+                </select></label
+              >
+              <label class="text-sm font-semibold"
+                >Grupo<select
+                  id="rubric-group"
+                  name="grupo"
+                  class="mt-2 w-full border rounded-xl px-3 py-3"
+                >
+                  <option value="">Todos los grupos</option>
+                  <option value="1">Grupo 1</option>
+                  <option value="2">Grupo 2</option>
+                  <option value="3">Grupo 3</option>
+                  <option value="4">Grupo 4</option>
+                  <option value="5">Grupo 5</option>
+                  <option value="6">Grupo 6</option>
+                  <option value="7">Grupo 7</option>
+                  <option value="8">Grupo 8</option>
+                </select></label
+              >
+              <label class="text-sm font-semibold"
+                >Orden por hora<select
+                  id="rubric-order"
+                  name="orden"
+                  class="mt-2 w-full border rounded-xl px-3 py-3"
+                >
+                  <option value="desc">Más reciente primero</option>
+                  <option value="asc">Más antigua primero</option>
+                </select></label
+              >
+              <button
+                class="sm:col-span-2 xl:col-span-4 bg-brand-600 text-white rounded-xl px-5 py-3 font-bold"
+              >
+                Aplicar filtros
+              </button>
             </form>
             <div class="grid sm:grid-cols-3 gap-4 mt-6">
-              <div class="bg-white panel rounded-2xl p-5"><p id="rubric-total" class="text-2xl font-extrabold"></p><p class="text-sm text-slate-500">Estudiantes registrados</p></div>
-              <div class="bg-white panel rounded-2xl p-5"><p id="rubric-attending" class="text-2xl font-extrabold text-emerald-600"></p><p class="text-sm text-slate-500">Sí asistirán</p></div>
-              <div class="bg-white panel rounded-2xl p-5"><p id="rubric-absent" class="text-2xl font-extrabold text-rose-600"></p><p class="text-sm text-slate-500">No asistirán</p></div>
+              <div class="bg-white panel rounded-2xl p-5">
+                <p id="rubric-total" class="text-2xl font-extrabold"></p>
+                <p class="text-sm text-slate-500">Estudiantes registrados</p>
+              </div>
+              <div class="bg-white panel rounded-2xl p-5">
+                <p
+                  id="rubric-attending"
+                  class="text-2xl font-extrabold text-emerald-600"
+                ></p>
+                <p class="text-sm text-slate-500">Sí asistirán</p>
+              </div>
+              <div class="bg-white panel rounded-2xl p-5">
+                <p
+                  id="rubric-absent"
+                  class="text-2xl font-extrabold text-rose-600"
+                ></p>
+                <p class="text-sm text-slate-500">No asistirán</p>
+              </div>
             </div>
             <div class="grid lg:grid-cols-2 gap-5 mt-6">
-              <section class="bg-white panel rounded-2xl p-5"><h2 class="font-bold">Por grado</h2><div id="rubric-by-grade" class="mt-3 space-y-2 text-sm"></div></section>
-              <section class="bg-white panel rounded-2xl p-5"><h2 class="font-bold">Por grupo</h2><div id="rubric-by-group" class="mt-3 space-y-2 text-sm"></div></section>
+              <section class="bg-white panel rounded-2xl p-5">
+                <h2 class="font-bold">Por grado</h2>
+                <div id="rubric-by-grade" class="mt-3 space-y-2 text-sm"></div>
+              </section>
+              <section class="bg-white panel rounded-2xl p-5">
+                <h2 class="font-bold">Por grupo</h2>
+                <div id="rubric-by-group" class="mt-3 space-y-2 text-sm"></div>
+              </section>
             </div>
             <section class="bg-white panel rounded-3xl overflow-hidden mt-6">
-              <div class="table-scroll overflow-x-auto"><table class="responsive-table min-w-[860px] w-full text-sm"><thead class="bg-slate-50 text-slate-500"><tr><th class="text-left p-5">#</th><th class="text-left p-5">Nombre completo</th><th class="text-left p-5">Grado</th><th class="text-left p-5">Grupo</th><th class="text-left p-5">Fecha</th><th class="text-left p-5">Hora de confirmación</th><th class="text-left p-5">Estado</th></tr></thead><tbody id="rubric-body"></tbody></table></div>
-              <p id="rubric-empty" class="hidden p-10 text-center text-slate-500">No hay confirmaciones para estos filtros.</p>
+              <div class="table-scroll overflow-x-auto">
+                <table class="responsive-table min-w-[860px] w-full text-sm">
+                  <thead class="bg-slate-50 text-slate-500">
+                    <tr>
+                      <th class="text-left p-5">#</th>
+                      <th class="text-left p-5">Nombre completo</th>
+                      <th class="text-left p-5">Grado</th>
+                      <th class="text-left p-5">Grupo</th>
+                      <th class="text-left p-5">Fecha</th>
+                      <th class="text-left p-5">Hora de confirmación</th>
+                      <th class="text-left p-5">Estado</th>
+                    </tr>
+                  </thead>
+                  <tbody id="rubric-body"></tbody>
+                </table>
+              </div>
+              <p
+                id="rubric-empty"
+                class="hidden p-10 text-center text-slate-500"
+              >
+                No hay confirmaciones para estos filtros.
+              </p>
             </section>
           </section>
         </section>
